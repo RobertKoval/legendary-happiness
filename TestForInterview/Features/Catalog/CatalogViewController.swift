@@ -12,13 +12,13 @@ import Combine
 final class CatalogViewController: UIViewController, Storyboarded {
     static var storyboardName: String = "Catalog"
 
-    private let columns: Int = 2
+    private let columns: Int = UIConstants.Layout.catalogColumns
     private let interSpacing: CGFloat = 16
-    private let outerHorizontalSpacing: CGFloat = 16.5
+    private let outerHorizontalSpacing: CGFloat = UIConstants.Layout.catalogOuterHorizontalSpacing
     private let inset: CGFloat = 16
-    private let headerHeight: CGFloat = 35
-    private let headerTopOffset: CGFloat = 24
-    private let navBarOffset: CGFloat = 33
+    private let headerHeight: CGFloat = UIConstants.Layout.catalogHeaderHeight
+    private let headerTopOffset: CGFloat = UIConstants.Layout.catalogHeaderTopOffset
+    private let navBarOffset: CGFloat = UIConstants.Layout.catalogNavBarOffset
 
     var viewModel: CatalogViewModel!
 
@@ -190,6 +190,7 @@ extension CatalogViewController: UICollectionViewDelegate {
 
         let movieDetailsViewModel = MovieDetailsViewModel(
             movieId: movie.id,
+            movieTitle: movie.title,
             api: api,
             localStorage: localStorage
         )

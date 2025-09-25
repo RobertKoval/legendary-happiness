@@ -7,7 +7,14 @@
 
 import SwiftUI
 
-struct SwiftUILoaderView: UIViewRepresentable {
+struct SwiftUILoaderView: View {
+    var body: some View {
+        LoaderViewRepresentable()
+            .frame(width: UIConstants.IconSize.loaderSize, height: UIConstants.IconSize.loaderSize)
+    }
+}
+
+private struct LoaderViewRepresentable: UIViewRepresentable {
     func makeUIView(context: Context) -> LoaderView {
         let loader = LoaderView()
         loader.startAnimating()

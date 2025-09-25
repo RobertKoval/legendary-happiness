@@ -8,7 +8,7 @@
 import Foundation
 
 // MARK: - TopRated
-struct TopRated: Codable {
+struct TopRatedDTO: Codable {
     let page: Int
     let results: [Result]
     let totalPages: Int

@@ -5,7 +5,10 @@
 //  Created by Robert Koval on 24.09.2025.
 //
 
+import Foundation
+
 struct TMDBClient {
-    let getMovieDetails: (Int) async throws -> Void // TODO: 
-    let getTopRatedMoviesAtPage: (Int) async throws -> TopRated
+    let getMovieDetails: (Int) async throws -> DetailsDTO
+    let getTopRatedMoviesAtPage: (Int) async throws -> TopRatedDTO
+    let downloadImageAtPath: (String) async throws -> Data
 }

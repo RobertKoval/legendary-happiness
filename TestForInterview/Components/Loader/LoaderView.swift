@@ -32,8 +32,8 @@ final class LoaderView: UIView {
         NSLayoutConstraint.activate([
             indicatorImageView.centerXAnchor.constraint(equalTo: centerXAnchor),
             indicatorImageView.centerYAnchor.constraint(equalTo: centerYAnchor),
-            indicatorImageView.widthAnchor.constraint(equalToConstant: 80),
-            indicatorImageView.heightAnchor.constraint(equalToConstant: 80)
+            indicatorImageView.widthAnchor.constraint(equalToConstant: UIConstants.IconSize.loaderSize),
+            indicatorImageView.heightAnchor.constraint(equalToConstant: UIConstants.IconSize.loaderSize)
         ])
     }
 

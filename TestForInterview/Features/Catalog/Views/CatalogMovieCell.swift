@@ -15,7 +15,7 @@ final class CatalogMovieCell: UICollectionViewCell {
         let imgView = UIImageView()
         imgView.contentMode = .scaleAspectFill
         imgView.clipsToBounds = true
-        imgView.layer.cornerRadius = 15
+        imgView.layer.cornerRadius = UIConstants.CornerRadius.poster
         imgView.translatesAutoresizingMaskIntoConstraints = false
         return imgView
     }()
@@ -62,12 +62,12 @@ final class CatalogMovieCell: UICollectionViewCell {
             posterImageView.topAnchor.constraint(equalTo: contentView.topAnchor),
             posterImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             posterImageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            posterImageView.heightAnchor.constraint(equalTo: posterImageView.widthAnchor, multiplier: 1.7),
+            posterImageView.heightAnchor.constraint(equalTo: posterImageView.widthAnchor, multiplier: UIConstants.AspectRatio.catalogPosterHeightMultiplier),
 
             favoriteIconView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
             favoriteIconView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -14),
-            favoriteIconView.widthAnchor.constraint(equalToConstant: 20),
-            favoriteIconView.heightAnchor.constraint(equalToConstant: 20),
+            favoriteIconView.widthAnchor.constraint(equalToConstant: UIConstants.IconSize.favoriteIcon),
+            favoriteIconView.heightAnchor.constraint(equalToConstant: UIConstants.IconSize.favoriteIcon),
 
             nameLabel.topAnchor.constraint(equalTo: posterImageView.bottomAnchor, constant: 4),
             nameLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),

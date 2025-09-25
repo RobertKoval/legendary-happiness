@@ -6,6 +6,6 @@
 //
 
 struct TMDBClient {
-    let getMovieDetails: (Int) async throws -> Void
-
+    let getMovieDetails: (Int) async throws -> Void // TODO: 
+    let getTopRatedMoviesAtPage: (Int) async throws -> TopRated
 }

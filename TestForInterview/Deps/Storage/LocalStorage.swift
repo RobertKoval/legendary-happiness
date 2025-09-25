@@ -6,4 +6,8 @@
 //
 
 struct LocalStorage {
+    let getFavoriteMovieIds: () -> Set<Int>
+    let addFavoriteMovieId: (Int) -> Void
+    let removeFavoriteMovieId: (Int) -> Void
+    let isFavorite: (Int) -> Bool
 }

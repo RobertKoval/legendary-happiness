@@ -7,6 +7,7 @@
 
 import UIKit
 import SwiftUI
+import Combine
 
 final class CatalogViewController: UIViewController, Storyboarded {
     static var storyboardName: String = "Catalog"
@@ -19,17 +20,26 @@ final class CatalogViewController: UIViewController, Storyboarded {
     private let headerTopOffset: CGFloat = 24
     private let navBarOffset: CGFloat = 33
 
+    var viewModel: CatalogViewModel!
 
-    // MARK: - IBOutlets
-    
+    private var cancellables = Set<AnyCancellable>()
+
     @IBOutlet private weak var collectionView: UICollectionView!
-    
+    private let loaderView = LoaderView()
+
+    private lazy var refreshControl: UIRefreshControl = {
+        let control = UIRefreshControl()
+        control.addTarget(self, action: #selector(refreshData), for: .valueChanged)
+        return control
+    }()
+
     // MARK: - Lifecycle
-    
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         setupUI()
+        bindViewModel()
+        viewModel.fetchMovies()
     }
 
     override func viewDidLayoutSubviews() {
@@ -49,13 +59,13 @@ final class CatalogViewController: UIViewController, Storyboarded {
         }
     }
 
-    // MARK: - UI Setup
-    
+    // MARK: - Setup
     private func setupUI() {
         navigationController?.navigationBar.isHidden = true
         collectionView.dataSource = self
         collectionView.delegate = self
         collectionView.contentInset.top = view.safeAreaInsets.top + navBarOffset
+        collectionView.refreshControl = refreshControl
 
         if let flow = collectionView.collectionViewLayout as? UICollectionViewFlowLayout {
             flow.estimatedItemSize = CGSize(width: 1, height: 1)
@@ -67,9 +77,56 @@ final class CatalogViewController: UIViewController, Storyboarded {
 
         collectionView.register(CatalogMovieCell.self, forCellWithReuseIdentifier: CatalogMovieCell.reuseId)
 
-        collectionView.reloadData()
+        setupLoaderView()
     }
 
+    private func setupLoaderView() {
+        loaderView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(loaderView)
+
+        NSLayoutConstraint.activate([
+            loaderView.topAnchor.constraint(equalTo: view.topAnchor),
+            loaderView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            loaderView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            loaderView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+
+        loaderView.startAnimating()
+    }
+
+    private func bindViewModel() {
+        viewModel.$state
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] state in
+                guard let self = self else { return }
+
+                switch state {
+                case .idle, .loading:
+                    self.loaderView.isHidden = false
+                    self.loaderView.startAnimating()
+
+                case .loaded:
+                    self.loaderView.isHidden = true
+                    self.loaderView.stopAnimating()
+                    self.refreshControl.endRefreshing()
+                    self.collectionView.reloadData()
+
+                case .failed(let error):
+                    // Error occurred
+                    self.loaderView.isHidden = true
+                    self.loaderView.stopAnimating()
+                    self.refreshControl.endRefreshing()
+                    // TODO: Show error state
+                    print("Error loading movies: \(error.localizedDescription)")
+                }
+            }
+            .store(in: &cancellables)
+    }
+
+    // MARK: - Actions
+    @objc private func refreshData() {
+        viewModel.refreshMovies()
+    }
 
     @objc private func searchTapped() { /* push search VC */ }
     @objc private func themeTapped() { /* present favorites */ }
@@ -77,7 +134,6 @@ final class CatalogViewController: UIViewController, Storyboarded {
 }
 
 // MARK: - UICollectionViewDataSource
-
 extension CatalogViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView,
                         viewForSupplementaryElementOfKind kind: String,
@@ -94,30 +150,60 @@ extension CatalogViewController: UICollectionViewDataSource {
     }
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 10
+        guard case let .loaded(data) = viewModel.state else { return 0 }
+        return data.count
     }
-    
+
     func collectionView(_ collectionView: UICollectionView,
                         cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CatalogMovieCell.reuseId,
                                                       for: indexPath) as! CatalogMovieCell
-        cell.configure(title: "Test", rating: 2, posterURL: nil, isFavorite: indexPath.item % 2 == 0 ? true : false)
-        
+
+        guard case let .loaded(data) = viewModel.state, indexPath.item < data.count else {
+            fatalError("Data inconsistency.!!!")
+        }
+
+        let movie = data.movies[indexPath.item]
+        cell.configure(
+            title: movie.title,
+            rating: movie.rating,
+            posterURL: movie.posterURL,
+            isFavorite: movie.isFavorite
+        )
+
         return cell
     }
-    
 }
 
 // MARK: - UICollectionViewDelegate
-
 extension CatalogViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let controller = UIHostingController(rootView: EmptyView())
-        
-        navigationController?.pushViewController(controller, animated: true)
+        guard case let .loaded(data) = viewModel.state, indexPath.item < data.count else {
+            fatalError("Data inconsistency.!!!")
+        }
+
+        let movie = data.movies[indexPath.item]
+
+        // TODO: Create dependencies in the another place.
+        let api = TMDBClient.live
+        let localStorage = LocalStorage.live
+
+        let movieDetailsViewModel = MovieDetailsViewModel(
+            movieId: movie.id,
+            api: api,
+            localStorage: localStorage
+        )
+
+        let movieDetailsView = MovieDetailsView(viewModel: movieDetailsViewModel) { [weak self] in
+            self?.navigationController?.popViewController(animated: true)
+        }
+
+        let hostingController = UIHostingController(rootView: movieDetailsView)
+        navigationController?.pushViewController(hostingController, animated: true)
     }
 }
 
+// MARK: - UICollectionViewDelegateFlowLayout
 extension CatalogViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView,
                         layout collectionViewLayout: UICollectionViewLayout,

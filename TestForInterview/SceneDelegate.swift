@@ -21,7 +21,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let window = UIWindow(windowScene: windowScene)
         let nav = UINavigationController()
 
+        // TODO: Create dependencies in a separate file.
+        let api = TMDBClient.live
+        let localStorage = LocalStorage.live
+        let viewModel = CatalogViewModel(api: api, localStorage: localStorage)
+
         let catalogVC: CatalogViewController = CatalogViewController.instantiate()
+        catalogVC.viewModel = viewModel
         nav.viewControllers = [catalogVC]
 
         window.rootViewController = nav

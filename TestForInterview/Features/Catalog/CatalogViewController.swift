@@ -106,10 +106,10 @@ final class CatalogViewController: UIViewController, Storyboarded {
                     self.loaderView.startAnimating()
 
                 case .loaded:
-                    self.loaderView.isHidden = true
-                    self.loaderView.stopAnimating()
                     self.refreshControl.endRefreshing()
                     self.collectionView.reloadData()
+                    self.loaderView.isHidden = true
+                    self.loaderView.stopAnimating()
 
                 case .failed(let error):
                     // Error occurred
@@ -145,6 +145,7 @@ extension CatalogViewController: UICollectionViewDataSource {
 
         header.onSearch = { [weak self] in self?.searchTapped() }
         header.onTheme = { [weak self] in self?.themeTapped() }
+        header.configure(averageRatingText: viewModel.averageRatingText)
         return header
     }
 

@@ -10,6 +10,9 @@ import UIKit
 final class CatalogHeaderView: UICollectionReusableView {
     static let reuseId = "CatalogHeaderView"
 
+    private static let title = "Movies"
+    private static let averagePrefix = "Avg"
+
     var onSearch: (() -> Void)?
     var onTheme: (() -> Void)?
 
@@ -19,7 +22,7 @@ final class CatalogHeaderView: UICollectionReusableView {
         lbl.font = UIFont.systemFont(ofSize: UIFontDescriptor.preferredFontDescriptor(withTextStyle: .title2).pointSize, weight: .bold)
         lbl.adjustsFontForContentSizeCategory = true
         lbl.textColor = .text
-        lbl.text = "Movie"
+        lbl.text = CatalogHeaderView.title
         return lbl
     }()
 
@@ -75,8 +78,24 @@ final class CatalogHeaderView: UICollectionReusableView {
         // Actions
         searchButton.addTarget(self, action: #selector(didTapSearch), for: .touchUpInside)
         themeButton.addTarget(self, action: #selector(didTapTheme), for: .touchUpInside)
+
+        configure(averageRatingText: nil)
     }
 
     @objc private func didTapSearch() { onSearch?() }
     @objc private func didTapTheme() { onTheme?() }
+
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        configure(averageRatingText: nil)
+    }
+
+    func configure(averageRatingText: String?) {
+        guard let averageRatingText else {
+            titleLabel.text = CatalogHeaderView.title
+            return
+        }
+
+        titleLabel.text = "\(CatalogHeaderView.title) | \(CatalogHeaderView.averagePrefix) \(averageRatingText)"
+    }
 }

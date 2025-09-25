@@ -11,6 +11,7 @@ struct Movies: Equatable {
     let page: Int
     let totalPages: Int
     let movies: [Movie]
+    let averageRatingText: String?
 
     var count: Int {
         movies.count

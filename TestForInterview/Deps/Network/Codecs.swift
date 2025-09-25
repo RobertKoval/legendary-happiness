@@ -9,15 +9,27 @@ import Foundation
 
 extension TopRatedDTO {
     func toMovies(favorites: Set<Int> = []) -> Movies {
-        Movies(page: page,
-               totalPages: totalPages,
-               movies: results.map { dto in
+        let movies = results.map { dto in
             Movie(id: dto.id,
                   title: dto.title,
                   rating: dto.voteAverage,
                   posterPath: dto.posterPath,
                   isFavorite: favorites.contains(dto.id))
-        })
+        }
+
+        return Movies(page: page,
+                      totalPages: totalPages,
+                      movies: movies,
+                      averageRatingText: Self.makeAverageRatingText(from: movies))
+    }
+
+    private static func makeAverageRatingText(from movies: [Movie]) -> String? {
+        guard !movies.isEmpty else { return nil }
+        let totalRating = movies.reduce(0.0) { partialResult, movie in
+            partialResult + movie.rating
+        }
+        let average = totalRating / Double(movies.count)
+        return formatRating(average)
     }
 }
 
@@ -27,13 +39,13 @@ extension DetailsDTO {
             id: id,
             title: title,
             overview: overview,
-            releaseDate: formatReleaseDate(releaseDate),
+            releaseDate: Self.formatReleaseDate(releaseDate),
             rating: formatRating(voteAverage),
             imageData: imageData
         )
     }
 
-    private func formatReleaseDate(_ dateString: String) -> String {
+    private static func formatReleaseDate(_ dateString: String) -> String {
         let inputFormatter = DateFormatter()
         inputFormatter.dateFormat = "yyyy-MM-dd"
 
@@ -46,8 +58,9 @@ extension DetailsDTO {
 
         return outputFormatter.string(from: date)
     }
+}
 
-    private func formatRating(_ rating: Double) -> String {
-        String(format: "%.1f", rating)
-    }
+// MARK: - Common
+private func formatRating(_ rating: Double) -> String {
+    String(format: "%.1f", rating)
 }

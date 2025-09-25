@@ -48,4 +48,11 @@ final class CatalogViewModel: ObservableObject {
         }
         return api.imageUrlFromPath(data.movies[index].posterPath)
     }
+
+    var averageRatingText: String? {
+        guard case let .loaded(data) = state else {
+            return nil
+        }
+        return data.averageRatingText
+    }
 }

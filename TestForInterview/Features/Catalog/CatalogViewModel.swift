@@ -41,4 +41,11 @@ final class CatalogViewModel: ObservableObject {
     func refreshMovies() {
         fetchMovies()
     }
+
+    func posterURLForMovieAt(index: Int) -> URL? {
+        guard case let .loaded(data) = state else {
+            return nil
+        }
+        return api.imageUrlFromPath(data.movies[index].posterPath)
+    }
 }

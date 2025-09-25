@@ -21,18 +21,18 @@ struct Movie: Equatable {
     let id: Int
     let title: String
     let rating: Double
-    let posterURL: URL
+    let posterPath: String
     let isFavorite: Bool
 
     init(id: Int,
          title: String,
          rating: Double,
-         posterURL: URL,
+         posterPath: String,
          isFavorite: Bool) {
         self.id = id
         self.title = title
         self.rating = rating
-        self.posterURL = posterURL
+        self.posterPath = posterPath
         self.isFavorite = isFavorite
     }
 }

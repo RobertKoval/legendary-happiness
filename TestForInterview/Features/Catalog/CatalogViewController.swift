@@ -130,7 +130,6 @@ final class CatalogViewController: UIViewController, Storyboarded {
 
     @objc private func searchTapped() { /* push search VC */ }
     @objc private func themeTapped() { /* present favorites */ }
-
 }
 
 // MARK: - UICollectionViewDataSource
@@ -167,7 +166,7 @@ extension CatalogViewController: UICollectionViewDataSource {
         cell.configure(
             title: movie.title,
             rating: movie.rating,
-            posterURL: movie.posterURL,
+            posterURL: viewModel.posterURLForMovieAt(index: indexPath.item),
             isFavorite: movie.isFavorite
         )
 

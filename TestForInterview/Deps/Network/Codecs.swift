@@ -15,7 +15,7 @@ extension TopRatedDTO {
             Movie(id: dto.id,
                   title: dto.title,
                   rating: dto.voteAverage,
-                  posterURL: URL(string: "https://image.tmdb.org/t/p/w500\(dto.posterPath)")!,
+                  posterPath: dto.posterPath,
                   isFavorite: favorites.contains(dto.id))
         })
     }

@@ -28,7 +28,8 @@ extension TopRatedDTO {
         return Movies(page: page,
                       totalPages: limitedTotalPages,
                       movies: movies,
-                      averageRatingText: Self.makeAverageRatingText(for: movies))
+                      averageRatingText: Self.makeAverageRatingText(for: movies),
+                      totalResults: totalResults)
     }
     
     private static func makeAverageRatingText(for movies: [Movie]) -> String? {
@@ -38,6 +39,28 @@ extension TopRatedDTO {
         }
         let average = totalRating / Double(movies.count)
         return formatRating(average)
+    }
+}
+
+extension SearchDTO {
+    var limitedTotalPages: Int {
+        min(totalPages, TopRatedMappingConstants.maxPageCount)
+    }
+
+    func toMovies(favorites: Set<Int> = []) -> Movies {
+        let movies = results.map { dto in
+            Movie(id: dto.id,
+                  title: dto.title,
+                  rating: dto.voteAverage,
+                  posterPath: dto.posterPath,
+                  isFavorite: favorites.contains(dto.id))
+        }
+
+        return Movies(page: page,
+                      totalPages: limitedTotalPages,
+                      movies: movies,
+                      averageRatingText: nil,
+                      totalResults: totalResults)
     }
 }
 

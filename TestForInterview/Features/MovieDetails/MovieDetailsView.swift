@@ -16,7 +16,7 @@ struct MovieDetailsView: View {
         VStack(spacing: 0) {
             header
                 .padding(.horizontal, 16)
-                .padding(.vertical, 24)
+                .padding(.vertical, UIConstants.Layout.catalogNavBarOffset)
 
             ZStack {
                 switch viewModel.state {
@@ -108,6 +108,7 @@ struct MovieDetailsView: View {
 
             Spacer()
         }
+        .frame(height: 60)
     }
 
     private var titleText: String {

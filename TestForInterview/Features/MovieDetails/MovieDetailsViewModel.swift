@@ -15,12 +15,18 @@ final class MovieDetailsViewModel: ObservableObject {
     let title: String
     private let api: TMDBClient
     private let localStorage: LocalStorage
+    private let placeholderGenerator: ImagePlaceholderGenerator
 
-    init(movieId: Int, movieTitle: String, api: TMDBClient, localStorage: LocalStorage) {
+    init(movieId: Int,
+         movieTitle: String,
+         api: TMDBClient,
+         localStorage: LocalStorage,
+         placeholderGenerator: ImagePlaceholderGenerator) {
         self.movieId = movieId
         self.title = movieTitle
         self.api = api
         self.localStorage = localStorage
+        self.placeholderGenerator = placeholderGenerator
         self.isFavorite = localStorage.isFavorite(movieId)
     }
 
@@ -31,7 +37,13 @@ final class MovieDetailsViewModel: ObservableObject {
 
             do {
                 let detailsDTO = try await api.getMovieDetails(movieId)
-                let imageData = try await api.downloadImageAtPath(detailsDTO.posterPath)
+                let imageData: Data
+                if let path = detailsDTO.posterPath {
+                    imageData = try await api.downloadImageAtPath(path)
+                } else {
+                    imageData = placeholderGenerator.generatePosterPlaceholder()
+                }
+
                 let movieDetails = detailsDTO.toMovieDetails(imageData: imageData)
                 state = .loaded(movieDetails)
             } catch {

@@ -12,7 +12,9 @@ enum UIConstants {
     enum Layout {
         static let catalogColumns = 2
         static let catalogOuterHorizontalSpacing: CGFloat = 16.5
-        static let catalogHeaderHeight: CGFloat = 35
+        static let catalogInteritemSpacing: CGFloat = 16
+        static let catalogCellSupplementaryHeight: CGFloat = 60
+        static let catalogHeaderHeight: CGFloat = 60
         static let catalogHeaderTopOffset: CGFloat = 24
         static let catalogNavBarOffset: CGFloat = 33
 
@@ -23,6 +25,8 @@ enum UIConstants {
         static let paginationButtonSize: CGFloat = 48
         static let paginationButtonSpacing: CGFloat = 8
         static let paginationMaxVisiblePages: Int = 7  // For pattern: [1] ... [x] [y] [z] ... [N]
+
+        static let searchHeaderHeight: CGFloat = 24
     }
 
     // MARK: - Aspect Ratios

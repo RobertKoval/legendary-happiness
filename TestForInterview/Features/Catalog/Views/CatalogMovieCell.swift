@@ -87,11 +87,13 @@ final class CatalogMovieCell: UICollectionViewCell {
         nameLabel.text = title
         ratingLabel.text = "Rating: \(rating)"
         favoriteIconView.image = isFavorite ? .starFull : .starEmpty
-        
-        posterImageView.sd_setImage(with: posterURL,
-                                    placeholderImage: UIImage.from(color: .systemGray5))
+
+        posterImageView.sd_setImage(
+            with: posterURL,
+            placeholderImage: UIImage(data: ImagePlaceholderGenerator.live.generatePosterPlaceholder())
+        )
     }
-    
+
     override func preferredLayoutAttributesFitting(_ attrs: UICollectionViewLayoutAttributes)
     -> UICollectionViewLayoutAttributes {
         setNeedsLayout()

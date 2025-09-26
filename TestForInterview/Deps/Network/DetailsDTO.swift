@@ -10,19 +10,17 @@ import Foundation
 // MARK: - MovieDetail
 struct DetailsDTO: Codable {
     let adult: Bool
-    let backdropPath: String
     let belongsToCollection: BelongsToCollection?
     let budget: Int
     let genres: [Genre]
     let homepage: String
     let id: Int
-    let imdbId: String
     let originCountry: [String]
     let originalLanguage: String
     let originalTitle: String
     let overview: String
     let popularity: Double
-    let posterPath: String
+    let posterPath: String?
     let productionCompanies: [ProductionCompany]
     let productionCountries: [ProductionCountry]
     let releaseDate: String
@@ -38,13 +36,11 @@ struct DetailsDTO: Codable {
 
     enum CodingKeys: String, CodingKey {
         case adult = "adult"
-        case backdropPath = "backdrop_path"
         case belongsToCollection = "belongs_to_collection"
         case budget = "budget"
         case genres = "genres"
         case homepage = "homepage"
         case id = "id"
-        case imdbId = "imdb_id"
         case originCountry = "origin_country"
         case originalLanguage = "original_language"
         case originalTitle = "original_title"
@@ -71,13 +67,11 @@ struct BelongsToCollection: Codable {
     let id: Int
     let name: String
     let posterPath: String
-    let backdropPath: String
 
     enum CodingKeys: String, CodingKey {
         case id = "id"
         case name = "name"
         case posterPath = "poster_path"
-        case backdropPath = "backdrop_path"
     }
 }
 

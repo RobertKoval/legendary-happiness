@@ -36,7 +36,14 @@ final class CatalogViewModel: ObservableObject {
         guard case let .loaded(data) = state else {
             return nil
         }
-        return api.imageUrlFromPath(data.movies[index].posterPath)
+        return posterURL(for: data.movies[index])
+    }
+
+    func posterURL(for movie: Movie) -> URL? {
+        guard let path = movie.posterPath else {
+            return nil
+        }
+        return api.imageUrlFromPath(path)
     }
     
     var averageRatingText: String? {
@@ -74,7 +81,32 @@ final class CatalogViewModel: ObservableObject {
             }
         }
     }
-    
+
+    func refreshFavorites() {
+        guard case let .loaded(data) = state else {
+            return
+        }
+
+        let favorites = localStorage.getFavoriteMovieIds()
+        let updatedMovies = data.movies.map { movie in
+            Movie(id: movie.id,
+                  title: movie.title,
+                  rating: movie.rating,
+                  posterPath: movie.posterPath,
+                  isFavorite: favorites.contains(movie.id))
+        }
+
+        let updatedState = Movies(
+            page: data.page,
+            totalPages: data.totalPages,
+            movies: updatedMovies,
+            averageRatingText: data.averageRatingText,
+            totalResults: data.totalResults
+        )
+
+        state = .loaded(updatedState)
+    }
+
     // MARK: - Helper Functions
     private func getCachedPage(for page: Int) -> Movies? {
         guard let cachedPage = cachedNextPage, cachedPage.page == page else {

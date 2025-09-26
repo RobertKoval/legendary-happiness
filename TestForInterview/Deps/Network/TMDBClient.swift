@@ -10,6 +10,7 @@ import Foundation
 struct TMDBClient {
     let getMovieDetails: (Int) async throws -> DetailsDTO
     let getTopRatedMoviesAtPage: (Int) async throws -> TopRatedDTO
+    let searchMovies: (String, Int) async throws -> SearchDTO
     let downloadImageAtPath: (String) async throws -> Data
     let imageUrlFromPath: (String) -> URL?
 }

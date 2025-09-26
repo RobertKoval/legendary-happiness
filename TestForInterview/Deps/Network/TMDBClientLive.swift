@@ -10,6 +10,7 @@ import Foundation
 private enum TMDBEndpoint {
     case topRated(page: Int)
     case movieDetails(id: Int)
+    case search(query: String, page: Int)
     case image(path: String)
 
     func url(baseURL: String) -> URL? {
@@ -28,6 +29,17 @@ private enum TMDBEndpoint {
             let path = "/movie/\(id)"
             let queryItems = [
                 URLQueryItem(name: "language", value: "en-US")
+            ]
+            var components = URLComponents(string: baseURL + path)
+            components?.queryItems = queryItems
+            return components?.url
+
+        case .search(let query, let page):
+            let path = "/search/movie"
+            let queryItems = [
+                URLQueryItem(name: "language", value: "en-US"),
+                URLQueryItem(name: "query", value: query),
+                URLQueryItem(name: "page", value: String(page))
             ]
             var components = URLComponents(string: baseURL + path)
             components?.queryItems = queryItems
@@ -76,6 +88,21 @@ extension TMDBClient {
 
                 let (data, _) = try await URLSession.shared.data(for: request)
                 return try JSONDecoder().decode(TopRatedDTO.self, from: data)
+            },
+            searchMovies: { query, page in
+                guard let url = TMDBEndpoint.search(query: query, page: page).url(baseURL: apiBaseURL) else {
+                    throw URLError(.badURL)
+                }
+                var request = URLRequest(url: url)
+                request.httpMethod = "GET"
+                request.timeoutInterval = 10
+                request.allHTTPHeaderFields = [
+                    "accept": "application/json",
+                    "Authorization": "Bearer \(apiKey)"
+                ]
+
+                let (data, _) = try await URLSession.shared.data(for: request)
+                return try JSONDecoder().decode(SearchDTO.self, from: data)
             },
             downloadImageAtPath: { imagePath in
                 guard let url = TMDBEndpoint.image(path: imagePath).url(baseURL: imageBaseURL) else {

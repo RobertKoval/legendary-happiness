@@ -12,23 +12,24 @@ struct Movies: Equatable {
     let totalPages: Int
     let movies: [Movie]
     let averageRatingText: String?
+    let totalResults: Int
 
     var count: Int {
         movies.count
     }
 }
 
-struct Movie: Equatable {
+struct Movie: Hashable {
     let id: Int
     let title: String
     let rating: Double
-    let posterPath: String
+    let posterPath: String?
     let isFavorite: Bool
 
     init(id: Int,
          title: String,
          rating: Double,
-         posterPath: String,
+         posterPath: String?,
          isFavorite: Bool) {
         self.id = id
         self.title = title

@@ -167,7 +167,7 @@ final class CatalogPaginationFooterView: UICollectionReusableView {
 
         label.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            label.widthAnchor.constraint(equalToConstant: buttonSize),
+            label.widthAnchor.constraint(equalToConstant: 16),
             label.heightAnchor.constraint(equalToConstant: buttonSize)
         ])
 

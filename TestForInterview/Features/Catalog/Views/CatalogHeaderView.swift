@@ -52,7 +52,7 @@ final class CatalogHeaderView: UICollectionReusableView {
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
     private func setup() {
-        backgroundColor = .systemBackground
+        backgroundColor = .background
 
         addSubview(titleLabel)
         addSubview(searchButton)

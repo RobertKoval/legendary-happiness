@@ -12,78 +12,74 @@ import Combine
 final class CatalogViewController: UIViewController, Storyboarded {
     static var storyboardName: String = "Catalog"
     
-    private let columns: Int = UIConstants.Layout.catalogColumns
-    private let interSpacing: CGFloat = 16
-    private let outerHorizontalSpacing: CGFloat = UIConstants.Layout.catalogOuterHorizontalSpacing
-    private let inset: CGFloat = 16
     private let headerHeight: CGFloat = UIConstants.Layout.catalogHeaderHeight
     private let headerTopOffset: CGFloat = UIConstants.Layout.catalogHeaderTopOffset
     private let navBarOffset: CGFloat = UIConstants.Layout.catalogNavBarOffset
-    
+
+    private enum Section {
+        case grid
+    }
+
+    private typealias DataSource = UICollectionViewDiffableDataSource<Section, Movie>
+    private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, Movie>
+
     var viewModel: CatalogViewModel!
+    var dependencies: AppAssembly!
     
     private var cancellables = Set<AnyCancellable>()
-    
+    private var dataSource: DataSource!
+    private var currentMovies: Movies?
+    private var lastAppliedPage: Int?
+    private var hasAppliedInitialSnapshot = false
+
     @IBOutlet private weak var collectionView: UICollectionView!
     private let loaderView = LoaderView()
-    
+
     private lazy var refreshControl: UIRefreshControl = {
         let control = UIRefreshControl()
         control.addTarget(self, action: #selector(refreshData), for: .valueChanged)
         return control
     }()
-    
+
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         setupUI()
         bindViewModel()
         viewModel.fetchMovies()
     }
-    
+
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        if let flow = collectionView.collectionViewLayout as? UICollectionViewFlowLayout {
-            let insets = UIEdgeInsets(top: headerTopOffset,
-                                      left: outerHorizontalSpacing,
-                                      bottom: 0,
-                                      right: outerHorizontalSpacing)
-            let total = insets.left + insets.right + interSpacing * (CGFloat(columns) - 1)
-            let w = floor(collectionView.bounds.width - total) / CGFloat(columns)
-            flow.minimumInteritemSpacing = interSpacing
-            flow.minimumLineSpacing = interSpacing
-            flow.sectionInset = insets
-            flow.estimatedItemSize = CGSize(width: w,
-                                            height: collectionView.bounds.height) // height will be estimated
-        }
+        MovieCollectionViewLayout.updateLayout(
+            collectionView,
+            configuration: .init(sectionTopInset: headerTopOffset)
+        )
     }
-    
+
     // MARK: - Setup
     private func setupUI() {
+        view.backgroundColor = .background
         navigationController?.navigationBar.isHidden = true
-        collectionView.dataSource = self
         collectionView.delegate = self
         collectionView.contentInset.top = view.safeAreaInsets.top + navBarOffset
         collectionView.refreshControl = refreshControl
-        
-        if let flow = collectionView.collectionViewLayout as? UICollectionViewFlowLayout {
-            flow.estimatedItemSize = CGSize(width: 1, height: 1)
-        }
-        
+
+        MovieCollectionViewLayout.setupCollectionView(collectionView)
+
         collectionView.register(CatalogHeaderView.self,
                                 forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
                                 withReuseIdentifier: CatalogHeaderView.reuseId)
-        
+
         collectionView.register(CatalogPaginationFooterView.self,
                                 forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter,
                                 withReuseIdentifier: CatalogPaginationFooterView.reuseId)
-        
-        collectionView.register(CatalogMovieCell.self, forCellWithReuseIdentifier: CatalogMovieCell.reuseId)
-        
+
+        configureDataSource()
         setupLoaderView()
     }
-    
+
     private func setupLoaderView() {
         loaderView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(loaderView)
@@ -97,24 +93,107 @@ final class CatalogViewController: UIViewController, Storyboarded {
         
         loaderView.startAnimating()
     }
-    
+
+    private func configureDataSource() {
+        dataSource = DataSource(collectionView: collectionView) { [weak self] collectionView, indexPath, movie in
+            guard
+                let cell = collectionView.dequeueReusableCell(
+                    withReuseIdentifier: CatalogMovieCell.reuseId,
+                    for: indexPath
+                ) as? CatalogMovieCell,
+                let self = self
+            else {
+                return UICollectionViewCell()
+            }
+
+            cell.configure(
+                title: movie.title,
+                rating: movie.rating,
+                posterURL: self.viewModel.posterURL(for: movie),
+                isFavorite: movie.isFavorite
+            )
+
+            return cell
+        }
+
+        dataSource.supplementaryViewProvider = { [weak self] collectionView, kind, indexPath in
+            guard let self = self else { return nil }
+
+            switch kind {
+            case UICollectionView.elementKindSectionHeader:
+                let header = collectionView.dequeueReusableSupplementaryView(
+                    ofKind: kind,
+                    withReuseIdentifier: CatalogHeaderView.reuseId,
+                    for: indexPath
+                ) as! CatalogHeaderView
+
+                header.onSearch = { [weak self] in self?.searchTapped() }
+                header.onTheme = { [weak self] in self?.themeTapped() }
+                header.configure(averageRatingText: self.viewModel.averageRatingText)
+                return header
+
+            case UICollectionView.elementKindSectionFooter:
+                let footer = collectionView.dequeueReusableSupplementaryView(
+                    ofKind: kind,
+                    withReuseIdentifier: CatalogPaginationFooterView.reuseId,
+                    for: indexPath
+                ) as! CatalogPaginationFooterView
+
+                guard let movies = self.currentMovies else {
+                    footer.configure(currentPage: 1, totalPages: 1, onPageSelected: { _ in })
+                    return footer
+                }
+
+                footer.configure(currentPage: movies.page, totalPages: movies.totalPages) { [weak self] page in
+                    self?.viewModel.loadPage(page)
+                }
+                return footer
+
+            default:
+                return nil
+            }
+        }
+    }
+
+    private func applySnapshot(with movies: Movies) {
+        var snapshot = Snapshot()
+        snapshot.appendSections([.grid])
+        snapshot.appendItems(movies.movies, toSection: .grid)
+
+        let shouldScroll = shouldScrollToTop(for: movies.page)
+        let shouldAnimate = hasAppliedInitialSnapshot && !shouldScroll
+
+        dataSource.apply(snapshot, animatingDifferences: shouldAnimate)
+
+        hasAppliedInitialSnapshot = true
+        lastAppliedPage = movies.page
+
+        if shouldScroll {
+            scrollToTop()
+        }
+    }
+
+    private func shouldScrollToTop(for newPage: Int) -> Bool {
+        guard let lastPage = lastAppliedPage else { return true }
+        return newPage != lastPage
+    }
+
     private func bindViewModel() {
         viewModel.$state
-            .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
                 guard let self = self else { return }
-                
+
                 switch state {
                 case .idle, .loading:
                     self.loaderView.isHidden = false
                     self.loaderView.startAnimating()
                     
-                case .loaded:
+                case .loaded(let data):
                     self.refreshControl.endRefreshing()
-                    self.collectionView.reloadData()
+                    self.currentMovies = data
+                    self.applySnapshot(with: data)
                     self.loaderView.isHidden = true
                     self.loaderView.stopAnimating()
-                    self.scrollToTop()
                     
                 case .failed(let error):
                     // Error occurred
@@ -127,114 +206,34 @@ final class CatalogViewController: UIViewController, Storyboarded {
             }
             .store(in: &cancellables)
     }
-    
+
     // MARK: - Actions
     @objc private func refreshData() {
         viewModel.refreshMovies()
     }
-    
+
     private func scrollToTop() {
         let topOffset = CGPoint(x: 0, y: -collectionView.contentInset.top)
         collectionView.setContentOffset(topOffset, animated: false)
     }
-    
-    @objc private func searchTapped() { /* push search VC */ }
-    @objc private func themeTapped() { /* present favorites */ }
-}
 
-// MARK: - UICollectionViewDataSource
-extension CatalogViewController: UICollectionViewDataSource {
-    func collectionView(_ collectionView: UICollectionView,
-                        viewForSupplementaryElementOfKind kind: String,
-                        at indexPath: IndexPath) -> UICollectionReusableView {
-        switch kind {
-        case UICollectionView.elementKindSectionHeader:
-            let header = collectionView.dequeueReusableSupplementaryView(
-                ofKind: kind,
-                withReuseIdentifier: CatalogHeaderView.reuseId,
-                for: indexPath
-            ) as! CatalogHeaderView
-            
-            header.onSearch = { [weak self] in self?.searchTapped() }
-            header.onTheme = { [weak self] in self?.themeTapped() }
-            header.configure(averageRatingText: viewModel.averageRatingText)
-            return header
-            
-        case UICollectionView.elementKindSectionFooter:
-            let footer = collectionView.dequeueReusableSupplementaryView(
-                ofKind: kind,
-                withReuseIdentifier: CatalogPaginationFooterView.reuseId,
-                for: indexPath
-            ) as! CatalogPaginationFooterView
-            
-            guard case let .loaded(data) = viewModel.state else {
-                footer.configure(currentPage: 1, totalPages: 1, onPageSelected: { _ in })
-                return footer
-            }
-            
-            footer.configure(currentPage: data.page, totalPages: data.totalPages) { [weak self] page in
-                self?.viewModel.loadPage(page)
-            }
-            return footer
-            
-        default:
-            fatalError("Unexpected supplementary view kind: \(kind)")
-        }
+    @objc private func searchTapped() {
+        let searchViewController = dependencies.makeSearchViewController(onDismiss: { [weak self] in
+            self?.viewModel.refreshFavorites()
+        })
+        navigationController?.pushViewController(searchViewController, animated: true)
     }
-    
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        guard case let .loaded(data) = viewModel.state else { return 0 }
-        return data.count
-    }
-    
-    func collectionView(_ collectionView: UICollectionView,
-                        cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CatalogMovieCell.reuseId,
-                                                      for: indexPath) as! CatalogMovieCell
-        
-        guard case let .loaded(data) = viewModel.state, indexPath.item < data.count else {
-            fatalError("Data inconsistency.!!!")
-        }
-        
-        let movie = data.movies[indexPath.item]
-        cell.configure(
-            title: movie.title,
-            rating: movie.rating,
-            posterURL: viewModel.posterURLForMovieAt(index: indexPath.item),
-            isFavorite: movie.isFavorite
-        )
-        
-        return cell
-    }
+    @objc private func themeTapped() { /* present favorites */ }
 }
 
 // MARK: - UICollectionViewDelegate
 extension CatalogViewController: UICollectionViewDelegate {
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        guard case let .loaded(data) = viewModel.state, indexPath.item < data.count else {
+        guard let movie = dataSource.itemIdentifier(for: indexPath) else {
             fatalError("Data inconsistency.!!!")
         }
-        
-        let movie = data.movies[indexPath.item]
-        
-        // TODO: Create dependencies in the another place.
-        let api = TMDBClient.live
-        let localStorage = LocalStorage.live
-        
-        let movieDetailsViewModel = MovieDetailsViewModel(
-            movieId: movie.id,
-            movieTitle: movie.title,
-            api: api,
-            localStorage: localStorage
-        )
-        
-        let movieDetailsView = MovieDetailsView(viewModel: movieDetailsViewModel) { [weak self] in
-            self?.navigationController?.popViewController(animated: true)
-        }
-        
-        let hostingController = UIHostingController(rootView: movieDetailsView)
-        navigationController?.pushViewController(hostingController, animated: true)
+        presentMovieDetails(movieId: movie.id)
     }
 }
 
@@ -245,34 +244,24 @@ extension CatalogViewController: UICollectionViewDelegateFlowLayout {
                         referenceSizeForHeaderInSection section: Int) -> CGSize {
         CGSize(width: collectionView.bounds.width, height: headerHeight)
     }
-    
+
     func collectionView(_ collectionView: UICollectionView,
                         layout collectionViewLayout: UICollectionViewLayout,
                         referenceSizeForFooterInSection section: Int) -> CGSize {
-        guard case let .loaded(data) = viewModel.state, data.totalPages > 1 else {
+        guard let data = currentMovies, data.totalPages > 1 else {
             return .zero
         }
         return CGSize(width: collectionView.bounds.width, height: UIConstants.Layout.paginationFooterHeight)
     }
-    
-    func collectionView(_ collectionView: UICollectionView,
-                        layout collectionViewLayout: UICollectionViewLayout,
-                        insetForSectionAt section: Int) -> UIEdgeInsets {
-        return UIEdgeInsets(top: headerTopOffset,
-                            left: outerHorizontalSpacing,
-                            bottom: 0,
-                            right: outerHorizontalSpacing)
-    }
-    
-    func collectionView(_ collectionView: UICollectionView,
-                        layout collectionViewLayout: UICollectionViewLayout,
-                        minimumLineSpacingForSectionAt section: Int) -> CGFloat {
-        return interSpacing
-    }
-    
-    func collectionView(_ collectionView: UICollectionView,
-                        layout collectionViewLayout: UICollectionViewLayout,
-                        minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
-        return interSpacing
+}
+
+// MARK: - Navigation
+extension CatalogViewController {
+    private func presentMovieDetails(movieId: Int) {
+        let controller = dependencies.makeMovieDetailsViewController(movieId: movieId) { [weak self] in
+            self?.navigationController?.popViewController(animated: true)
+            self?.viewModel.refreshFavorites()
+        }
+        navigationController?.pushViewController(controller, animated: true)
     }
 }

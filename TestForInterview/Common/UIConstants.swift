@@ -18,6 +18,11 @@ enum UIConstants {
 
         static let movieDetailsPosterExtraHorizontalPadding: CGFloat = 46.5
         static let favoriteButtonMinHeight: CGFloat = 47
+
+        static let paginationFooterHeight: CGFloat = 80
+        static let paginationButtonSize: CGFloat = 48
+        static let paginationButtonSpacing: CGFloat = 8
+        static let paginationMaxVisiblePages: Int = 7  // For pattern: [1] ... [x] [y] [z] ... [N]
     }
 
     // MARK: - Aspect Ratios

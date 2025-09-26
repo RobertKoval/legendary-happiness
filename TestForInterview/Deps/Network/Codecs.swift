@@ -7,7 +7,15 @@
 
 import Foundation
 
+private enum TopRatedMappingConstants {
+    static let maxPageCount: Int = 500
+}
+
 extension TopRatedDTO {
+    var limitedTotalPages: Int {
+        min(totalPages, TopRatedMappingConstants.maxPageCount)
+    }
+    
     func toMovies(favorites: Set<Int> = []) -> Movies {
         let movies = results.map { dto in
             Movie(id: dto.id,
@@ -16,17 +24,17 @@ extension TopRatedDTO {
                   posterPath: dto.posterPath,
                   isFavorite: favorites.contains(dto.id))
         }
-
+        
         return Movies(page: page,
-                      totalPages: totalPages,
+                      totalPages: limitedTotalPages,
                       movies: movies,
-                      averageRatingText: Self.makeAverageRatingText(from: movies))
+                      averageRatingText: Self.makeAverageRatingText(for: movies))
     }
-
-    private static func makeAverageRatingText(from movies: [Movie]) -> String? {
+    
+    private static func makeAverageRatingText(for movies: [Movie]) -> String? {
         guard !movies.isEmpty else { return nil }
-        let totalRating = movies.reduce(0.0) { partialResult, movie in
-            partialResult + movie.rating
+        let totalRating = movies.reduce(0.0) { partial, movie in
+            partial + movie.rating
         }
         let average = totalRating / Double(movies.count)
         return formatRating(average)
@@ -44,18 +52,18 @@ extension DetailsDTO {
             imageData: imageData
         )
     }
-
+    
     private static func formatReleaseDate(_ dateString: String) -> String {
         let inputFormatter = DateFormatter()
         inputFormatter.dateFormat = "yyyy-MM-dd"
-
+        
         let outputFormatter = DateFormatter()
         outputFormatter.dateFormat = "d MMMM yyyy"
-
+        
         guard let date = inputFormatter.date(from: dateString) else {
             return dateString
         }
-
+        
         return outputFormatter.string(from: date)
     }
 }

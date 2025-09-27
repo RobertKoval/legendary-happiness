@@ -34,8 +34,9 @@ final class SearchHeaderView: UICollectionReusableView {
         NSLayoutConstraint.activate([
             titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: inset),
             titleLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
-            titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -inset),
-            titleLabel.heightAnchor.constraint(equalToConstant: 24)
+            titleLabel.trailingAnchor.constraint(
+                lessThanOrEqualTo: trailingAnchor, constant: -inset),
+            titleLabel.heightAnchor.constraint(equalToConstant: 24),
         ])
     }
 

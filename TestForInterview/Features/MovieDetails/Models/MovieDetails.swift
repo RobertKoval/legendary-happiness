@@ -11,8 +11,7 @@ struct MovieDetails: Equatable {
     let id: Int
     let title: String
     let overview: String
-    let releaseDate: String // Formatted
+    let releaseDate: String  // Formatted
     let rating: String
     let imageData: Data
 }
-

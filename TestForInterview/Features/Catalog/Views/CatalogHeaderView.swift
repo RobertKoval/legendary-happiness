@@ -20,7 +20,9 @@ final class CatalogHeaderView: UICollectionReusableView {
     private let titleLabel: UILabel = {
         let lbl = UILabel()
         lbl.translatesAutoresizingMaskIntoConstraints = false
-        lbl.font = UIFont.systemFont(ofSize: UIFontDescriptor.preferredFontDescriptor(withTextStyle: .title2).pointSize, weight: .bold)
+        lbl.font = UIFont.systemFont(
+            ofSize: UIFontDescriptor.preferredFontDescriptor(withTextStyle: .title2).pointSize,
+            weight: .bold)
         lbl.adjustsFontForContentSizeCategory = true
         lbl.textColor = .text
         lbl.text = CatalogHeaderView.title
@@ -81,12 +83,14 @@ final class CatalogHeaderView: UICollectionReusableView {
             themeButton.heightAnchor.constraint(equalToConstant: 24),
             themeButton.widthAnchor.constraint(equalTo: themeButton.heightAnchor),
 
-            searchButton.trailingAnchor.constraint(equalTo: themeButton.leadingAnchor, constant: -buttonSpacing),
+            searchButton.trailingAnchor.constraint(
+                equalTo: themeButton.leadingAnchor, constant: -buttonSpacing),
             searchButton.centerYAnchor.constraint(equalTo: centerYAnchor),
             searchButton.heightAnchor.constraint(equalTo: themeButton.heightAnchor),
             searchButton.widthAnchor.constraint(equalTo: themeButton.widthAnchor),
 
-            favoritesButton.trailingAnchor.constraint(equalTo: searchButton.leadingAnchor, constant: -buttonSpacing),
+            favoritesButton.trailingAnchor.constraint(
+                equalTo: searchButton.leadingAnchor, constant: -buttonSpacing),
             favoritesButton.centerYAnchor.constraint(equalTo: centerYAnchor),
             favoritesButton.heightAnchor.constraint(equalTo: themeButton.heightAnchor),
             favoritesButton.widthAnchor.constraint(equalTo: themeButton.widthAnchor),
@@ -115,6 +119,7 @@ final class CatalogHeaderView: UICollectionReusableView {
             return
         }
 
-        titleLabel.text = "\(CatalogHeaderView.title) | \(CatalogHeaderView.averagePrefix) \(averageRatingText)"
+        titleLabel.text =
+            "\(CatalogHeaderView.title) | \(CatalogHeaderView.averagePrefix) \(averageRatingText)"
     }
 }

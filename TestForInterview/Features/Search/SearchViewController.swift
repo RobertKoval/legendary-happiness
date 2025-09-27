@@ -5,8 +5,8 @@
 //  Created by Robert Koval on 26.09.2025.
 //
 
-import UIKit
 import Combine
+import UIKit
 
 final class InsetTextField: UITextField {
     /// Space from the text field's left boundary to the icon
@@ -25,17 +25,23 @@ final class InsetTextField: UITextField {
     override func textRect(forBounds bounds: CGRect) -> CGRect {
         // super already accounts for leftView width; we only add the gap after it
         let r = super.textRect(forBounds: bounds)
-        return r.inset(by: UIEdgeInsets(top: 0, left: textGapFromIcon, bottom: 0, right: contentTrailingPadding))
+        return r.inset(
+            by: UIEdgeInsets(
+                top: 0, left: textGapFromIcon, bottom: 0, right: contentTrailingPadding))
     }
 
     override func editingRect(forBounds bounds: CGRect) -> CGRect {
         let r = super.editingRect(forBounds: bounds)
-        return r.inset(by: UIEdgeInsets(top: 0, left: textGapFromIcon, bottom: 0, right: contentTrailingPadding))
+        return r.inset(
+            by: UIEdgeInsets(
+                top: 0, left: textGapFromIcon, bottom: 0, right: contentTrailingPadding))
     }
 
     override func placeholderRect(forBounds bounds: CGRect) -> CGRect {
         let r = super.placeholderRect(forBounds: bounds)
-        return r.inset(by: UIEdgeInsets(top: 0, left: textGapFromIcon, bottom: 0, right: contentTrailingPadding))
+        return r.inset(
+            by: UIEdgeInsets(
+                top: 0, left: textGapFromIcon, bottom: 0, right: contentTrailingPadding))
     }
 }
 
@@ -171,7 +177,9 @@ final class SearchViewController: UIViewController {
         headerView.addSubview(titleLabel)
 
         NSLayoutConstraint.activate([
-            headerView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: UIConstants.Layout.catalogNavBarOffset),
+            headerView.topAnchor.constraint(
+                equalTo: view.safeAreaLayoutGuide.topAnchor,
+                constant: UIConstants.Layout.catalogNavBarOffset),
             headerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             headerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             headerView.heightAnchor.constraint(equalToConstant: 60),
@@ -183,7 +191,8 @@ final class SearchViewController: UIViewController {
 
             titleLabel.leadingAnchor.constraint(equalTo: backButton.trailingAnchor, constant: 16),
             titleLabel.centerYAnchor.constraint(equalTo: headerView.centerYAnchor),
-            titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: headerView.trailingAnchor, constant: -16)
+            titleLabel.trailingAnchor.constraint(
+                lessThanOrEqualTo: headerView.trailingAnchor, constant: -16),
         ])
 
         backButton.addTarget(self, action: #selector(backTapped), for: .touchUpInside)
@@ -196,7 +205,7 @@ final class SearchViewController: UIViewController {
             searchTextField.topAnchor.constraint(equalTo: headerView.bottomAnchor, constant: 16),
             searchTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             searchTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            searchTextField.heightAnchor.constraint(equalToConstant: 50)
+            searchTextField.heightAnchor.constraint(equalToConstant: 50),
         ])
 
         searchTextField.addTarget(self, action: #selector(searchTextChanged), for: .editingChanged)
@@ -206,21 +215,24 @@ final class SearchViewController: UIViewController {
         view.addSubview(collectionView)
 
         NSLayoutConstraint.activate([
-            collectionView.topAnchor.constraint(equalTo: searchTextField.bottomAnchor, constant: 16),
+            collectionView.topAnchor.constraint(
+                equalTo: searchTextField.bottomAnchor, constant: 16),
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
 
         MovieCollectionViewLayout.setupCollectionView(collectionView)
 
-        collectionView.register(SearchHeaderView.self,
-                                forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
-                                withReuseIdentifier: SearchHeaderView.reuseId)
+        collectionView.register(
+            SearchHeaderView.self,
+            forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+            withReuseIdentifier: SearchHeaderView.reuseId)
 
-        collectionView.register(CatalogPaginationFooterView.self,
-                                forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter,
-                                withReuseIdentifier: CatalogPaginationFooterView.reuseId)
+        collectionView.register(
+            CatalogPaginationFooterView.self,
+            forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter,
+            withReuseIdentifier: CatalogPaginationFooterView.reuseId)
 
         configureDataSource()
     }
@@ -233,7 +245,7 @@ final class SearchViewController: UIViewController {
             loaderView.topAnchor.constraint(equalTo: searchTextField.bottomAnchor),
             loaderView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             loaderView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            loaderView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            loaderView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
 
         loaderView.isHidden = true
@@ -244,17 +256,19 @@ final class SearchViewController: UIViewController {
         view.addSubview(emptyStateView)
 
         NSLayoutConstraint.activate([
-            emptyStateView.topAnchor.constraint(equalTo: searchTextField.bottomAnchor, constant: 16),
+            emptyStateView.topAnchor.constraint(
+                equalTo: searchTextField.bottomAnchor, constant: 16),
             emptyStateView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             emptyStateView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            emptyStateView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            emptyStateView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
 
         emptyStateView.isHidden = true
     }
 
     private func configureDataSource() {
-        dataSource = DataSource(collectionView: collectionView) { [weak self] collectionView, indexPath, item in
+        dataSource = DataSource(collectionView: collectionView) {
+            [weak self] collectionView, indexPath, item in
             guard
                 let cell = collectionView.dequeueReusableCell(
                     withReuseIdentifier: CatalogMovieCell.reuseId,
@@ -289,11 +303,12 @@ final class SearchViewController: UIViewController {
 
             switch kind {
             case UICollectionView.elementKindSectionHeader:
-                let header = collectionView.dequeueReusableSupplementaryView(
-                    ofKind: kind,
-                    withReuseIdentifier: SearchHeaderView.reuseId,
-                    for: indexPath
-                ) as! SearchHeaderView
+                let header =
+                    collectionView.dequeueReusableSupplementaryView(
+                        ofKind: kind,
+                        withReuseIdentifier: SearchHeaderView.reuseId,
+                        for: indexPath
+                    ) as! SearchHeaderView
 
                 if case let .loaded(data) = self.viewModel.state, !data.movies.isEmpty {
                     header.configure(resultsCount: data.totalResults)
@@ -302,14 +317,16 @@ final class SearchViewController: UIViewController {
                 return header
 
             case UICollectionView.elementKindSectionFooter:
-                let footer = collectionView.dequeueReusableSupplementaryView(
-                    ofKind: kind,
-                    withReuseIdentifier: CatalogPaginationFooterView.reuseId,
-                    for: indexPath
-                ) as! CatalogPaginationFooterView
+                let footer =
+                    collectionView.dequeueReusableSupplementaryView(
+                        ofKind: kind,
+                        withReuseIdentifier: CatalogPaginationFooterView.reuseId,
+                        for: indexPath
+                    ) as! CatalogPaginationFooterView
 
                 if case let .loaded(data) = self.viewModel.state {
-                    footer.configure(currentPage: data.page, totalPages: data.totalPages) { [weak self] page in
+                    footer.configure(currentPage: data.page, totalPages: data.totalPages) {
+                        [weak self] page in
                         self?.viewModel.loadPage(page)
                     }
                 }
@@ -445,13 +462,20 @@ final class SearchViewController: UIViewController {
 
 // MARK: - UICollectionViewDelegateFlowLayout
 extension SearchViewController: UICollectionViewDelegateFlowLayout {
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+    func collectionView(
+        _ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout,
+        referenceSizeForHeaderInSection section: Int
+    ) -> CGSize {
         // Show header only when results are available; hide for empty, idle, loading, or failed states
         guard case let .loaded(data) = viewModel.state, !data.movies.isEmpty else { return .zero }
-        return CGSize(width: collectionView.bounds.width, height: UIConstants.Layout.catalogHeaderHeight)
+        return CGSize(
+            width: collectionView.bounds.width, height: UIConstants.Layout.catalogHeaderHeight)
     }
 
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForFooterInSection section: Int) -> CGSize {
+    func collectionView(
+        _ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout,
+        referenceSizeForFooterInSection section: Int
+    ) -> CGSize {
         guard case let .loaded(data) = viewModel.state, data.totalPages > 1 else { return .zero }
         return CGSize(width: collectionView.bounds.width, height: 60)
     }
@@ -466,7 +490,10 @@ extension SearchViewController: UICollectionViewDelegateFlowLayout {
         }
     }
 
-    func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
+    func collectionView(
+        _ collectionView: UICollectionView, contextMenuConfigurationForItemAt indexPath: IndexPath,
+        point: CGPoint
+    ) -> UIContextMenuConfiguration? {
         guard let item = dataSource.itemIdentifier(for: indexPath) else { return nil }
 
         switch item {
@@ -491,7 +518,8 @@ extension SearchViewController: UICollectionViewDelegateFlowLayout {
 // MARK: - Navigation
 extension SearchViewController {
     func presentMovieDetails(movieId: Int) {
-        let controller = dependencies.makeMovieDetailsViewController(movieId: movieId) { [weak self] in
+        let controller = dependencies.makeMovieDetailsViewController(movieId: movieId) {
+            [weak self] in
             guard let self = self else { return }
             self.navigationController?.popViewController(animated: true)
             self.viewModel.refreshFavorites()

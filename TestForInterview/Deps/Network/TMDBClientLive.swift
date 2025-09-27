@@ -19,7 +19,7 @@ private enum TMDBEndpoint {
             let path = "/movie/top_rated"
             let queryItems = [
                 URLQueryItem(name: "language", value: "en-US"),
-                URLQueryItem(name: "page", value: String(page))
+                URLQueryItem(name: "page", value: String(page)),
             ]
             var components = URLComponents(string: baseURL + path)
             components?.queryItems = queryItems
@@ -39,7 +39,7 @@ private enum TMDBEndpoint {
             let queryItems = [
                 URLQueryItem(name: "language", value: "en-US"),
                 URLQueryItem(name: "query", value: query),
-                URLQueryItem(name: "page", value: String(page))
+                URLQueryItem(name: "page", value: String(page)),
             ]
             var components = URLComponents(string: baseURL + path)
             components?.queryItems = queryItems
@@ -53,14 +53,17 @@ private enum TMDBEndpoint {
 
 extension TMDBClient {
     // TODO: Move request creation into separate helper function with generic decode type.
-    
-    static func live(apiKey: String = Helper.apiKey,
-                     apiBaseURL: String = "https://api.themoviedb.org/3",
-                     imageBaseURL: String = "https://image.tmdb.org/t/p/w500",
-                     session: URLSession = .shared) -> TMDBClient {
+
+    static func live(
+        apiKey: String = Helper.apiKey,
+        apiBaseURL: String = "https://api.themoviedb.org/3",
+        imageBaseURL: String = "https://image.tmdb.org/t/p/w500",
+        session: URLSession = .shared
+    ) -> TMDBClient {
         TMDBClient(
             getMovieDetails: { movieId in
-                guard let url = TMDBEndpoint.movieDetails(id: movieId).url(baseURL: apiBaseURL) else {
+                guard let url = TMDBEndpoint.movieDetails(id: movieId).url(baseURL: apiBaseURL)
+                else {
                     throw URLError(.badURL)
                 }
                 var request = URLRequest(url: url)
@@ -68,7 +71,7 @@ extension TMDBClient {
                 request.timeoutInterval = 10
                 request.allHTTPHeaderFields = [
                     "accept": "application/json",
-                    "Authorization": "Bearer \(apiKey)"
+                    "Authorization": "Bearer \(apiKey)",
                 ]
 
                 let (data, _) = try await URLSession.shared.data(for: request)
@@ -78,7 +81,9 @@ extension TMDBClient {
                 return try await withThrowingTaskGroup(of: DetailsDTO?.self) { group in
                     for id in movieIds {
                         group.addTask {
-                            guard let url = TMDBEndpoint.movieDetails(id: id).url(baseURL: apiBaseURL) else {
+                            guard
+                                let url = TMDBEndpoint.movieDetails(id: id).url(baseURL: apiBaseURL)
+                            else {
                                 throw URLError(.badURL)
                             }
                             var request = URLRequest(url: url)
@@ -86,7 +91,7 @@ extension TMDBClient {
                             request.timeoutInterval = 10
                             request.allHTTPHeaderFields = [
                                 "accept": "application/json",
-                                "Authorization": "Bearer \(apiKey)"
+                                "Authorization": "Bearer \(apiKey)",
                             ]
 
                             let (data, _) = try await URLSession.shared.data(for: request)
@@ -112,14 +117,16 @@ extension TMDBClient {
                 request.timeoutInterval = 10
                 request.allHTTPHeaderFields = [
                     "accept": "application/json",
-                    "Authorization": "Bearer \(apiKey)"
+                    "Authorization": "Bearer \(apiKey)",
                 ]
 
                 let (data, _) = try await URLSession.shared.data(for: request)
                 return try JSONDecoder().decode(TopRatedDTO.self, from: data)
             },
             searchMovies: { query, page in
-                guard let url = TMDBEndpoint.search(query: query, page: page).url(baseURL: apiBaseURL) else {
+                guard
+                    let url = TMDBEndpoint.search(query: query, page: page).url(baseURL: apiBaseURL)
+                else {
                     throw URLError(.badURL)
                 }
                 var request = URLRequest(url: url)
@@ -127,14 +134,15 @@ extension TMDBClient {
                 request.timeoutInterval = 10
                 request.allHTTPHeaderFields = [
                     "accept": "application/json",
-                    "Authorization": "Bearer \(apiKey)"
+                    "Authorization": "Bearer \(apiKey)",
                 ]
 
                 let (data, _) = try await URLSession.shared.data(for: request)
                 return try JSONDecoder().decode(SearchDTO.self, from: data)
             },
             downloadImageAtPath: { imagePath in
-                guard let url = TMDBEndpoint.image(path: imagePath).url(baseURL: imageBaseURL) else {
+                guard let url = TMDBEndpoint.image(path: imagePath).url(baseURL: imageBaseURL)
+                else {
                     throw URLError(.badURL)
                 }
                 var request = URLRequest(url: url)
@@ -143,7 +151,8 @@ extension TMDBClient {
 
                 let (data, _) = try await URLSession.shared.data(for: request)
                 return data
-            }, imageUrlFromPath: { path in
+            },
+            imageUrlFromPath: { path in
                 return TMDBEndpoint.image(path: path).url(baseURL: imageBaseURL)
             }
         )

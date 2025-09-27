@@ -19,7 +19,7 @@ struct EquatableError: Error, Equatable, CustomStringConvertible {
         self.equals = { ($0 as? Base) == base }
     }
 
-    static func ==(lhs: EquatableError, rhs: EquatableError) -> Bool {
+    static func == (lhs: EquatableError, rhs: EquatableError) -> Bool {
         lhs.equals(rhs.base)
     }
 

@@ -30,17 +30,17 @@ extension ImagePlaceholderGenerator {
                     let notFound = UIImage.notFound
                     let iconSize: CGFloat = 80
                     let iconRect = CGRect(
-                        x: (size.width - iconSize)/2,
-                        y: (size.height - iconSize)/2,
+                        x: (size.width - iconSize) / 2,
+                        y: (size.height - iconSize) / 2,
                         width: iconSize,
                         height: iconSize
                     )
 
                     // Bigger circle background around icon
-                    let circleSize = iconSize + 32 // 16px padding on each side
+                    let circleSize = iconSize + 32  // 16px padding on each side
                     let circleBg = CGRect(
-                        x: (size.width - circleSize)/2,
-                        y: (size.height - circleSize)/2,
+                        x: (size.width - circleSize) / 2,
+                        y: (size.height - circleSize) / 2,
                         width: circleSize,
                         height: circleSize
                     )

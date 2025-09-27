@@ -26,11 +26,13 @@ struct Movie: Hashable {
     let posterPath: String?
     let isFavorite: Bool
 
-    init(id: Int,
-         title: String,
-         rating: Double,
-         posterPath: String?,
-         isFavorite: Bool) {
+    init(
+        id: Int,
+        title: String,
+        rating: Double,
+        posterPath: String?,
+        isFavorite: Bool
+    ) {
         self.id = id
         self.title = title
         self.rating = rating

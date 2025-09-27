@@ -18,12 +18,14 @@ final class MovieDetailsViewModel: ObservableObject {
     private let placeholderGenerator: ImagePlaceholderGenerator
     private let cachedDetailsDTO: DetailsDTO?
 
-    init(movieId: Int,
-         movieTitle: String,
-         api: TMDBClient,
-         localStorage: LocalStorage,
-         placeholderGenerator: ImagePlaceholderGenerator,
-         cachedDetailsDTO: DetailsDTO? = nil) {
+    init(
+        movieId: Int,
+        movieTitle: String,
+        api: TMDBClient,
+        localStorage: LocalStorage,
+        placeholderGenerator: ImagePlaceholderGenerator,
+        cachedDetailsDTO: DetailsDTO? = nil
+    ) {
         self.movieId = movieId
         self.title = movieTitle
         self.api = api

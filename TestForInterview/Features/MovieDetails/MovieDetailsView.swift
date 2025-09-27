@@ -121,7 +121,6 @@ struct MovieDetailsView: View {
         }
     }
 
-
     private func errorView(_ error: EquatableError) -> some View {
         VStack {
             Spacer()

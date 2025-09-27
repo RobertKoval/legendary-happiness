@@ -13,7 +13,7 @@ final class CatalogPaginationFooterView: UICollectionReusableView {
     private let maxVisiblePages = UIConstants.Layout.paginationMaxVisiblePages
     private let buttonSize: CGFloat = UIConstants.Layout.paginationButtonSize
     private let buttonSpacing: CGFloat = UIConstants.Layout.paginationButtonSpacing
-    private let dotsNumber = -1 // number in the array of pages.
+    private let dotsNumber = -1  // number in the array of pages.
 
     private var currentPage = 1
     private var totalPages = 1
@@ -45,7 +45,7 @@ final class CatalogPaginationFooterView: UICollectionReusableView {
             stackView.centerXAnchor.constraint(equalTo: centerXAnchor),
             stackView.centerYAnchor.constraint(equalTo: centerYAnchor),
             stackView.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor, constant: 16),
-            stackView.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -16)
+            stackView.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -16),
         ])
     }
 
@@ -137,7 +137,7 @@ final class CatalogPaginationFooterView: UICollectionReusableView {
         button.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             button.widthAnchor.constraint(equalToConstant: buttonSize),
-            button.heightAnchor.constraint(equalToConstant: buttonSize)
+            button.heightAnchor.constraint(equalToConstant: buttonSize),
         ])
 
         if page == currentPage {
@@ -168,7 +168,7 @@ final class CatalogPaginationFooterView: UICollectionReusableView {
         label.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             label.widthAnchor.constraint(equalToConstant: 16),
-            label.heightAnchor.constraint(equalToConstant: buttonSize)
+            label.heightAnchor.constraint(equalToConstant: buttonSize),
         ])
 
         return label

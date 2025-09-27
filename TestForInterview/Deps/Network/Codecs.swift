@@ -15,21 +15,23 @@ extension TopRatedDTO {
     var limitedTotalPages: Int {
         min(totalPages, TopRatedMappingConstants.maxPageCount)
     }
-    
+
     func toMovies(favorites: Set<Int> = []) -> Movies {
         let movies = results.map { dto in
-            Movie(id: dto.id,
-                  title: dto.title,
-                  rating: dto.voteAverage,
-                  posterPath: dto.posterPath,
-                  isFavorite: favorites.contains(dto.id))
+            Movie(
+                id: dto.id,
+                title: dto.title,
+                rating: dto.voteAverage,
+                posterPath: dto.posterPath,
+                isFavorite: favorites.contains(dto.id))
         }
-        
-        return Movies(page: page,
-                      totalPages: limitedTotalPages,
-                      movies: movies,
-                      averageRatingText: movies.makeAverageRatingText(),
-                      totalResults: totalResults)
+
+        return Movies(
+            page: page,
+            totalPages: limitedTotalPages,
+            movies: movies,
+            averageRatingText: movies.makeAverageRatingText(),
+            totalResults: totalResults)
     }
 }
 
@@ -51,18 +53,20 @@ extension SearchDTO {
 
     func toMovies(favorites: Set<Int> = []) -> Movies {
         let movies = results.map { dto in
-            Movie(id: dto.id,
-                  title: dto.title,
-                  rating: dto.voteAverage,
-                  posterPath: dto.posterPath,
-                  isFavorite: favorites.contains(dto.id))
+            Movie(
+                id: dto.id,
+                title: dto.title,
+                rating: dto.voteAverage,
+                posterPath: dto.posterPath,
+                isFavorite: favorites.contains(dto.id))
         }
 
-        return Movies(page: page,
-                      totalPages: limitedTotalPages,
-                      movies: movies,
-                      averageRatingText: nil,
-                      totalResults: totalResults)
+        return Movies(
+            page: page,
+            totalPages: limitedTotalPages,
+            movies: movies,
+            averageRatingText: nil,
+            totalResults: totalResults)
     }
 }
 
@@ -91,14 +95,14 @@ extension DetailsDTO {
     private static func formatReleaseDate(_ dateString: String) -> String {
         let inputFormatter = DateFormatter()
         inputFormatter.dateFormat = "yyyy-MM-dd"
-        
+
         let outputFormatter = DateFormatter()
         outputFormatter.dateFormat = "d MMMM yyyy"
-        
+
         guard let date = inputFormatter.date(from: dateString) else {
             return dateString
         }
-        
+
         return outputFormatter.string(from: date)
     }
 }

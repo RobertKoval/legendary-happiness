@@ -56,12 +56,12 @@ final class EmptyStateView: UIView {
             stackView.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -16),
 
             imageView.widthAnchor.constraint(equalToConstant: 120),
-            imageView.heightAnchor.constraint(equalToConstant: 120)
+            imageView.heightAnchor.constraint(equalToConstant: 120),
         ])
 
         NSLayoutConstraint.activate([
             messageLabel.leadingAnchor.constraint(equalTo: stackView.leadingAnchor),
-            messageLabel.trailingAnchor.constraint(equalTo: stackView.trailingAnchor)
+            messageLabel.trailingAnchor.constraint(equalTo: stackView.trailingAnchor),
         ])
     }
 

@@ -5,8 +5,8 @@
 //  Created by Robert Koval on 26.09.2025.
 //
 
-import Foundation
 import Combine
+import Foundation
 
 @MainActor
 final class SearchViewModel: ObservableObject {
@@ -80,11 +80,12 @@ final class SearchViewModel: ObservableObject {
 
         let favorites = localStorage.getFavoriteMovieIds()
         let updatedMovies = data.movies.map { movie in
-            Movie(id: movie.id,
-                  title: movie.title,
-                  rating: movie.rating,
-                  posterPath: movie.posterPath,
-                  isFavorite: favorites.contains(movie.id))
+            Movie(
+                id: movie.id,
+                title: movie.title,
+                rating: movie.rating,
+                posterPath: movie.posterPath,
+                isFavorite: favorites.contains(movie.id))
         }
 
         let updatedState = Movies(
@@ -97,7 +98,6 @@ final class SearchViewModel: ObservableObject {
 
         state = .loaded(updatedState)
     }
-
 
     // MARK: - Helper Functions
     private func runSearch(query: String, page: Int, showLoading: Bool) {

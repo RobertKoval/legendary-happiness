@@ -5,8 +5,8 @@
 //  Created by Robert Koval on 27.09.2025.
 //
 
-import UIKit
 import SwiftUI
+import UIKit
 
 @MainActor
 struct AppAssembly {
@@ -14,9 +14,11 @@ struct AppAssembly {
     let localStorage: LocalStorage
     let placeholderGenerator: ImagePlaceholderGenerator
 
-    init(api: TMDBClient = .live,
-         localStorage: LocalStorage = .live,
-         placeholderGenerator: ImagePlaceholderGenerator = .live) {
+    init(
+        api: TMDBClient = .live,
+        localStorage: LocalStorage = .live,
+        placeholderGenerator: ImagePlaceholderGenerator = .live
+    ) {
         self.api = api
         self.localStorage = localStorage
         self.placeholderGenerator = placeholderGenerator
@@ -42,9 +44,11 @@ struct AppAssembly {
     }
 
     // MARK: - Movie Details
-    func makeMovieDetailsViewController(movieId: Int,
-                                        onBack: @escaping () -> Void,
-                                        cachedDetailsDTO: DetailsDTO? = nil) -> UIViewController {
+    func makeMovieDetailsViewController(
+        movieId: Int,
+        onBack: @escaping () -> Void,
+        cachedDetailsDTO: DetailsDTO? = nil
+    ) -> UIViewController {
         let viewModel = MovieDetailsViewModel(
             movieId: movieId,
             movieTitle: "",

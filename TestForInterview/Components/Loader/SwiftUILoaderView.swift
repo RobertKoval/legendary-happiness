@@ -21,7 +21,5 @@ private struct LoaderViewRepresentable: UIViewRepresentable {
         return loader
     }
 
-    func updateUIView(_ uiView: LoaderView, context: Context) {
-        // TODO: Do we need to stop it?
-    }
+    func updateUIView(_ uiView: LoaderView, context: Context) {}
 }

@@ -47,7 +47,7 @@ final class InsetTextField: UITextField {
 
 final class SearchViewController: UIViewController {
     var viewModel: SearchViewModel!
-    var dependencies: AppAssembly!
+    var appAssembly: AppAssembly!
     var onDismiss: (() -> Void)?
 
     private enum Section {
@@ -486,7 +486,7 @@ extension SearchViewController: UICollectionViewDelegateFlowLayout {
         case .placeholder:
             return
         case .movie(let movie):
-            presentMovieDetails(movieId: movie.id)
+            presentMovieDetails(movieId: movie.id, title: movie.title)
         }
     }
 
@@ -517,8 +517,10 @@ extension SearchViewController: UICollectionViewDelegateFlowLayout {
 
 // MARK: - Navigation
 extension SearchViewController {
-    func presentMovieDetails(movieId: Int) {
-        let controller = dependencies.makeMovieDetailsViewController(movieId: movieId) {
+    func presentMovieDetails(movieId: Int, title: String) {
+        let controller = appAssembly.makeMovieDetailsViewController(
+            movieId: movieId, movieTitle: title
+        ) {
             [weak self] in
             guard let self = self else { return }
             self.navigationController?.popViewController(animated: true)

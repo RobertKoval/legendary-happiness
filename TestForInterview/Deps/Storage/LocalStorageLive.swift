@@ -9,6 +9,7 @@ import Foundation
 
 private enum StorageKey: String {
     case favoriteMovieIds = "FavoriteMovieIds"
+    case themePreference = "ThemePreference"
 }
 
 extension LocalStorage {
@@ -37,6 +38,16 @@ extension LocalStorage {
                 let favoriteIds =
                     defaults.array(forKey: StorageKey.favoriteMovieIds.rawValue) as? [Int] ?? []
                 return favoriteIds.contains(movieId)
+            },
+            getThemePreference: {
+                defaults.string(forKey: StorageKey.themePreference.rawValue)
+            },
+            setThemePreference: { value in
+                if let value {
+                    defaults.set(value, forKey: StorageKey.themePreference.rawValue)
+                } else {
+                    defaults.removeObject(forKey: StorageKey.themePreference.rawValue)
+                }
             }
         )
     }

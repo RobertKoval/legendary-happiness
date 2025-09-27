@@ -24,7 +24,7 @@ final class CatalogViewController: UIViewController, Storyboarded {
     private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, Movie>
 
     var viewModel: CatalogViewModel!
-    var dependencies: AppAssembly!
+    var appAssembly: AppAssembly!
 
     private var cancellables = Set<AnyCancellable>()
     private var dataSource: DataSource!
@@ -235,22 +235,46 @@ final class CatalogViewController: UIViewController, Storyboarded {
     }
 
     @objc private func searchTapped() {
-        let searchViewController = dependencies.makeSearchViewController(onDismiss: { [weak self] in
+        let searchViewController = appAssembly.makeSearchViewController { [weak self] in
             self?.viewModel.refreshFavorites()
-        })
+        }
         navigationController?.pushViewController(searchViewController, animated: true)
     }
     @objc private func favoritesTapped() {
         FavoritesSheetViewController.presentModally(
             from: self,
-            dependencies: dependencies,
+            appAssembly: appAssembly,
             onDismiss: { [weak self] in
                 self?.viewModel.refreshFavorites()
             })
     }
 
     @objc private func themeTapped() {
-        // TODO: Implement theme switching
+        let alert = UIAlertController(
+            title: "App Theme", message: nil, preferredStyle: .actionSheet)
+
+        Theme.allCases.forEach { theme in
+            let isCurrent = theme == viewModel.currentTheme
+            let title = isCurrent ? "\(theme.title) ✓" : theme.title
+            let action = UIAlertAction(title: title, style: .default) { [weak self] _ in
+                self?.viewModel.setTheme(theme)
+            }
+            alert.addAction(action)
+        }
+
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+
+        if let popover = alert.popoverPresentationController {
+            popover.sourceView = view
+            popover.sourceRect = CGRect(
+                x: view.bounds.midX,
+                y: view.safeAreaInsets.top + UIConstants.Layout.catalogNavBarOffset,
+                width: 1,
+                height: 1
+            )
+        }
+
+        present(alert, animated: true)
     }
 }
 
@@ -260,7 +284,7 @@ extension CatalogViewController: UICollectionViewDelegate {
         guard let movie = dataSource.itemIdentifier(for: indexPath) else {
             fatalError("Data inconsistency.!!!")
         }
-        presentMovieDetails(movieId: movie.id)
+        presentMovieDetails(movieId: movie.id, title: movie.title)
     }
 
     func collectionView(
@@ -310,8 +334,10 @@ extension CatalogViewController: UICollectionViewDelegateFlowLayout {
 
 // MARK: - Navigation
 extension CatalogViewController {
-    private func presentMovieDetails(movieId: Int) {
-        let controller = dependencies.makeMovieDetailsViewController(movieId: movieId) {
+    private func presentMovieDetails(movieId: Int, title: String) {
+        let controller = appAssembly.makeMovieDetailsViewController(
+            movieId: movieId, movieTitle: title
+        ) {
             [weak self] in
             self?.navigationController?.popViewController(animated: true)
             self?.viewModel.refreshFavorites()

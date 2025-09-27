@@ -10,4 +10,6 @@ struct LocalStorage {
     let addFavoriteMovieId: (Int) -> Void
     let removeFavoriteMovieId: (Int) -> Void
     let isFavorite: (Int) -> Bool
+    let getThemePreference: () -> String?
+    let setThemePreference: (String?) -> Void
 }

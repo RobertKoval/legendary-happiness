@@ -7,6 +7,7 @@
 
 import Foundation
 
+@MainActor
 final class MovieDetailsViewModel: ObservableObject {
     @Published var state: ViewState<MovieDetails> = .idle
     @Published var isFavorite: Bool = false

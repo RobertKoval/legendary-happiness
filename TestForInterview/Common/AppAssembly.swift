@@ -10,26 +10,26 @@ import UIKit
 
 @MainActor
 struct AppAssembly {
-    let api: TMDBClient
-    let localStorage: LocalStorage
-    let placeholderGenerator: ImagePlaceholderGenerator
+    private let api: TMDBClient
+    private let localStorage: LocalStorage
+    private let placeholderGenerator: ImagePlaceholderGenerator
+    private let themeManager: ThemeManager
 
-    init(
-        api: TMDBClient = .live,
-        localStorage: LocalStorage = .live,
-        placeholderGenerator: ImagePlaceholderGenerator = .live
-    ) {
-        self.api = api
-        self.localStorage = localStorage
-        self.placeholderGenerator = placeholderGenerator
+    init(environment: AppEnvironment) {
+        self.api = environment.api
+        self.localStorage = environment.localStorage
+        self.placeholderGenerator = environment.placeholderGenerator
+        self.themeManager = environment.themeManager
     }
 
     // MARK: - Catalog
     func makeCatalogViewController() -> CatalogViewController {
-        let viewModel = CatalogViewModel(api: api, localStorage: localStorage)
+        let viewModel = CatalogViewModel(
+            api: api, localStorage: localStorage, themeManager: themeManager)
         let controller: CatalogViewController = CatalogViewController.instantiate()
         controller.viewModel = viewModel
-        controller.dependencies = self
+        controller.appAssembly = self
+
         return controller
     }
 
@@ -38,7 +38,7 @@ struct AppAssembly {
         let viewModel = SearchViewModel(api: api, localStorage: localStorage)
         let controller = SearchViewController()
         controller.viewModel = viewModel
-        controller.dependencies = self
+        controller.appAssembly = self
         controller.onDismiss = onDismiss
         return controller
     }
@@ -46,12 +46,13 @@ struct AppAssembly {
     // MARK: - Movie Details
     func makeMovieDetailsViewController(
         movieId: Int,
+        movieTitle: String,
         onBack: @escaping () -> Void,
         cachedDetailsDTO: DetailsDTO? = nil
     ) -> UIViewController {
         let viewModel = MovieDetailsViewModel(
             movieId: movieId,
-            movieTitle: "",
+            movieTitle: movieTitle,
             api: api,
             localStorage: localStorage,
             placeholderGenerator: placeholderGenerator,

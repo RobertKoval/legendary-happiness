@@ -5,11 +5,13 @@
 //  Created by Sam Titovskyi on 18.08.2025.
 //
 
+import Combine
 import UIKit
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
+    private var themeCancellable: AnyCancellable?
 
     func scene(
         _ scene: UIScene, willConnectTo session: UISceneSession,
@@ -21,9 +23,18 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
 
         let window = UIWindow(windowScene: windowScene)
-        let assembly = AppAssembly()
+        let environment = AppEnvironment.live()
+        let assembly = AppAssembly(environment: environment)
         let rootViewController = assembly.makeCatalogViewController()
         let nav = UINavigationController(rootViewController: rootViewController)
+
+        window.overrideUserInterfaceStyle = environment.themeManager.interfaceStyle
+
+        themeCancellable = environment.themeManager.themePublisher
+            .receive(on: RunLoop.main)
+            .sink { [weak window] theme in
+                window?.overrideUserInterfaceStyle = theme.interfaceStyle
+            }
 
         window.rootViewController = nav
         window.makeKeyAndVisible()

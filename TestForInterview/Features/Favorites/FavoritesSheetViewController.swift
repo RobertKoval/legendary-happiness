@@ -359,10 +359,10 @@ final class FavoritesSheetViewController: UIViewController {
     // MARK: - Presentation
     static func presentModally(
         from presenter: UIViewController,
-        dependencies: AppAssembly,
+        appAssembly: AppAssembly,
         onDismiss: (() -> Void)? = nil
     ) {
-        let favoritesViewController = dependencies.makeFavoritesSheetViewController(
+        let favoritesViewController = appAssembly.makeFavoritesSheetViewController(
             onDismiss: onDismiss)
 
         let navigationController = UINavigationController(
@@ -389,6 +389,7 @@ final class FavoritesSheetViewController: UIViewController {
             }
         }
     }
+
 }
 
 // MARK: - UICollectionViewDelegate
@@ -399,7 +400,7 @@ extension FavoritesSheetViewController: UICollectionViewDelegate {
         case .placeholder:
             return
         case .movie(let movie):
-            presentMovieDetails(movieId: movie.id)
+            presentMovieDetails(movieId: movie.id, title: movie.title)
         }
     }
 
@@ -427,10 +428,11 @@ extension FavoritesSheetViewController: UICollectionViewDelegate {
         }
     }
 
-    private func presentMovieDetails(movieId: Int) {
+    private func presentMovieDetails(movieId: Int, title: String) {
         let cachedDetailsDTO = viewModel.getCachedDetailsDTO(for: movieId)
         let controller = dependencies.makeMovieDetailsViewController(
             movieId: movieId,
+            movieTitle: title,
             onBack: { [weak self] in
                 guard let self = self else { return }
                 self.navigationController?.popViewController(animated: true)

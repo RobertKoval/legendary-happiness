@@ -13,12 +13,14 @@ final class CatalogViewModel: ObservableObject {
 
     private let api: TMDBClient
     private let localStorage: LocalStorage
+    private let themeManager: ThemeManager
 
     private var cachedNextPage: Movies?  // Pre-loaded next page
 
-    init(api: TMDBClient, localStorage: LocalStorage) {
+    init(api: TMDBClient, localStorage: LocalStorage, themeManager: ThemeManager) {
         self.api = api
         self.localStorage = localStorage
+        self.themeManager = themeManager
     }
 
     func fetchMovies() {
@@ -48,6 +50,10 @@ final class CatalogViewModel: ObservableObject {
             return nil
         }
         return data.averageRatingText
+    }
+
+    var currentTheme: Theme {
+        themeManager.currentTheme
     }
 
     func loadPage(_ page: Int) {
@@ -162,5 +168,9 @@ final class CatalogViewModel: ObservableObject {
             localStorage.addFavoriteMovieId(movieId)
         }
         refreshFavorites()
+    }
+
+    func setTheme(_ theme: Theme) {
+        themeManager.setTheme(theme)
     }
 }

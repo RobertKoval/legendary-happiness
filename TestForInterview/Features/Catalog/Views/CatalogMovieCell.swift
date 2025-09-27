@@ -27,6 +27,12 @@ final class CatalogMovieCell: UICollectionViewCell {
         return imgView
     }()
 
+    private let textContainer: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+
     private let nameLabel: UILabel = {
         let lbl = UILabel()
         lbl.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
@@ -55,8 +61,9 @@ final class CatalogMovieCell: UICollectionViewCell {
     private func setupLayout() {
         contentView.addSubview(posterImageView)
         contentView.addSubview(favoriteIconView)
-        contentView.addSubview(nameLabel)
-        contentView.addSubview(ratingLabel)
+        contentView.addSubview(textContainer)
+        textContainer.addSubview(nameLabel)
+        textContainer.addSubview(ratingLabel)
 
         NSLayoutConstraint.activate([
             posterImageView.topAnchor.constraint(equalTo: contentView.topAnchor),
@@ -74,14 +81,19 @@ final class CatalogMovieCell: UICollectionViewCell {
             favoriteIconView.heightAnchor.constraint(
                 equalToConstant: UIConstants.IconSize.favoriteIcon),
 
-            nameLabel.topAnchor.constraint(equalTo: posterImageView.bottomAnchor, constant: 4),
-            nameLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            nameLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            textContainer.topAnchor.constraint(equalTo: posterImageView.bottomAnchor, constant: 4),
+            textContainer.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            textContainer.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            textContainer.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            textContainer.heightAnchor.constraint(equalToConstant: 52),
+
+            nameLabel.topAnchor.constraint(equalTo: textContainer.topAnchor),
+            nameLabel.leadingAnchor.constraint(equalTo: textContainer.leadingAnchor),
+            nameLabel.trailingAnchor.constraint(equalTo: textContainer.trailingAnchor),
 
             ratingLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 4),
-            ratingLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            ratingLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            ratingLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            ratingLabel.leadingAnchor.constraint(equalTo: textContainer.leadingAnchor),
+            ratingLabel.trailingAnchor.constraint(equalTo: textContainer.trailingAnchor),
         ])
 
         nameLabel.setContentCompressionResistancePriority(.required, for: .vertical)

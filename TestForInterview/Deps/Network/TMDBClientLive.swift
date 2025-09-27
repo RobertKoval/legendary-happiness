@@ -74,6 +74,35 @@ extension TMDBClient {
                 let (data, _) = try await URLSession.shared.data(for: request)
                 return try JSONDecoder().decode(DetailsDTO.self, from: data)
             },
+            getMovieDetailsList: { movieIds in
+                return try await withThrowingTaskGroup(of: DetailsDTO?.self) { group in
+                    for id in movieIds {
+                        group.addTask {
+                            guard let url = TMDBEndpoint.movieDetails(id: id).url(baseURL: apiBaseURL) else {
+                                throw URLError(.badURL)
+                            }
+                            var request = URLRequest(url: url)
+                            request.httpMethod = "GET"
+                            request.timeoutInterval = 10
+                            request.allHTTPHeaderFields = [
+                                "accept": "application/json",
+                                "Authorization": "Bearer \(apiKey)"
+                            ]
+
+                            let (data, _) = try await URLSession.shared.data(for: request)
+                            return try JSONDecoder().decode(DetailsDTO.self, from: data)
+                        }
+                    }
+
+                    var results: [DetailsDTO] = []
+                    for try await result in group {
+                        if let result = result {
+                            results.append(result)
+                        }
+                    }
+                    return results
+                }
+            },
             getTopRatedMoviesAtPage: { page in
                 guard let url = TMDBEndpoint.topRated(page: page).url(baseURL: apiBaseURL) else {
                     throw URLError(.badURL)

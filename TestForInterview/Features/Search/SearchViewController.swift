@@ -61,8 +61,7 @@ final class SearchViewController: UIViewController {
     private let sectionTopInset: CGFloat = 16
 
     private var dataSource: DataSource!
-    private var currentMovies: Movies?
-    private var lastAppliedPage: Int?
+    private var lastDisplayedPage: Int?
     private var lastSnapshotQuery: String?
     private var hasAppliedInitialSnapshot = false
 
@@ -296,8 +295,8 @@ final class SearchViewController: UIViewController {
                     for: indexPath
                 ) as! SearchHeaderView
 
-                if let movies = self.currentMovies, !movies.movies.isEmpty {
-                    header.configure(resultsCount: movies.totalResults)
+                if case let .loaded(data) = self.viewModel.state, !data.movies.isEmpty {
+                    header.configure(resultsCount: data.totalResults)
                 }
 
                 return header
@@ -309,8 +308,8 @@ final class SearchViewController: UIViewController {
                     for: indexPath
                 ) as! CatalogPaginationFooterView
 
-                if let movies = self.currentMovies {
-                    footer.configure(currentPage: movies.page, totalPages: movies.totalPages) { [weak self] page in
+                if case let .loaded(data) = self.viewModel.state {
+                    footer.configure(currentPage: data.page, totalPages: data.totalPages) { [weak self] page in
                         self?.viewModel.loadPage(page)
                     }
                 }
@@ -340,7 +339,7 @@ final class SearchViewController: UIViewController {
         dataSource.apply(snapshot, animatingDifferences: shouldAnimate)
 
         hasAppliedInitialSnapshot = true
-        lastAppliedPage = movies.page
+        lastDisplayedPage = movies.page
         lastSnapshotQuery = query
 
         if shouldScroll {
@@ -352,14 +351,13 @@ final class SearchViewController: UIViewController {
         var snapshot = Snapshot()
         snapshot.appendSections([.grid])
         dataSource.apply(snapshot, animatingDifferences: hasAppliedInitialSnapshot)
-        currentMovies = nil
-        lastAppliedPage = nil
+        lastDisplayedPage = nil
         lastSnapshotQuery = nil
     }
 
     private func shouldScrollToTop(newPage: Int, query: String) -> Bool {
         if lastSnapshotQuery != query { return true }
-        guard let lastPage = lastAppliedPage else { return true }
+        guard let lastPage = lastDisplayedPage else { return true }
         return newPage != lastPage
     }
 
@@ -409,13 +407,11 @@ final class SearchViewController: UIViewController {
             loaderView.stopAnimating()
 
             if data.movies.isEmpty {
-                currentMovies = nil
                 emptyStateView.updateMessage(emptyStateMessage)
                 emptyStateView.isHidden = false
                 collectionView.isHidden = true
                 applyEmptySnapshot()
             } else {
-                currentMovies = data
                 emptyStateView.updateMessage(nil)
                 emptyStateView.isHidden = true
                 collectionView.isHidden = false
@@ -451,12 +447,12 @@ final class SearchViewController: UIViewController {
 extension SearchViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
         // Show header only when results are available; hide for empty, idle, loading, or failed states
-        guard let movies = currentMovies, !movies.movies.isEmpty else { return .zero }
+        guard case let .loaded(data) = viewModel.state, !data.movies.isEmpty else { return .zero }
         return CGSize(width: collectionView.bounds.width, height: UIConstants.Layout.catalogHeaderHeight)
     }
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForFooterInSection section: Int) -> CGSize {
-        guard let movies = currentMovies, movies.totalPages > 1 else { return .zero }
+        guard case let .loaded(data) = viewModel.state, data.totalPages > 1 else { return .zero }
         return CGSize(width: collectionView.bounds.width, height: 60)
     }
 
@@ -467,6 +463,27 @@ extension SearchViewController: UICollectionViewDelegateFlowLayout {
             return
         case .movie(let movie):
             presentMovieDetails(movieId: movie.id)
+        }
+    }
+
+    func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
+        guard let item = dataSource.itemIdentifier(for: indexPath) else { return nil }
+
+        switch item {
+        case .placeholder:
+            return nil
+        case .movie(let movie):
+            return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in
+                let favoriteAction = UIAction(
+                    title: movie.isFavorite ? "Remove from Favorites" : "Add to Favorites",
+                    image: UIImage(systemName: movie.isFavorite ? "heart.slash" : "heart"),
+                    attributes: movie.isFavorite ? .destructive : []
+                ) { [weak self] _ in
+                    self?.viewModel.toggleFavorite(movieId: movie.id)
+                }
+
+                return UIMenu(title: "", children: [favoriteAction])
+            }
         }
     }
 }

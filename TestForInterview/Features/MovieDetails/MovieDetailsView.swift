@@ -40,6 +40,7 @@ struct MovieDetailsView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+        .navigationBarHidden(true)
     }
 
     private func contentView(movieDetails: MovieDetails) -> some View {

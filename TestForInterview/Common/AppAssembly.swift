@@ -43,15 +43,29 @@ struct AppAssembly {
 
     // MARK: - Movie Details
     func makeMovieDetailsViewController(movieId: Int,
-                                        onBack: @escaping () -> Void) -> UIViewController {
+                                        onBack: @escaping () -> Void,
+                                        cachedDetailsDTO: DetailsDTO? = nil) -> UIViewController {
         let viewModel = MovieDetailsViewModel(
             movieId: movieId,
             movieTitle: "",
             api: api,
             localStorage: localStorage,
-            placeholderGenerator: placeholderGenerator
+            placeholderGenerator: placeholderGenerator,
+            cachedDetailsDTO: cachedDetailsDTO
         )
         let view = MovieDetailsView(viewModel: viewModel, onBack: onBack)
         return UIHostingController(rootView: view)
+    }
+
+    // MARK: - Favorites
+    func makeFavoritesSheetViewController(onDismiss: (() -> Void)? = nil)
+        -> FavoritesSheetViewController
+    {
+        let viewModel = FavoritesViewModel(api: api, localStorage: localStorage)
+        let controller = FavoritesSheetViewController()
+        controller.viewModel = viewModel
+        controller.dependencies = self
+        controller.onDismiss = onDismiss
+        return controller
     }
 }

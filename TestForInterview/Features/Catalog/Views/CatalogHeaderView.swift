@@ -15,6 +15,7 @@ final class CatalogHeaderView: UICollectionReusableView {
 
     var onSearch: (() -> Void)?
     var onTheme: (() -> Void)?
+    var onFavorites: (() -> Void)?
 
     private let titleLabel: UILabel = {
         let lbl = UILabel()
@@ -30,6 +31,15 @@ final class CatalogHeaderView: UICollectionReusableView {
         let btn = UIButton(type: .system)
         btn.translatesAutoresizingMaskIntoConstraints = false
         btn.setImage(.searchGlass, for: .normal)
+        btn.imageView?.contentMode = .scaleAspectFit
+        btn.tintColor = .text
+        return btn
+    }()
+
+    private let favoritesButton: UIButton = {
+        let btn = UIButton(type: .system)
+        btn.translatesAutoresizingMaskIntoConstraints = false
+        btn.setImage(.starFull, for: .normal)
         btn.imageView?.contentMode = .scaleAspectFit
         btn.tintColor = .text
         return btn
@@ -56,10 +66,12 @@ final class CatalogHeaderView: UICollectionReusableView {
 
         addSubview(titleLabel)
         addSubview(searchButton)
+        addSubview(favoritesButton)
         addSubview(themeButton)
 
         // Layout
         let inset: CGFloat = 16
+        let buttonSpacing: CGFloat = 16
         NSLayoutConstraint.activate([
             titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: inset),
             titleLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
@@ -69,20 +81,27 @@ final class CatalogHeaderView: UICollectionReusableView {
             themeButton.heightAnchor.constraint(equalToConstant: 24),
             themeButton.widthAnchor.constraint(equalTo: themeButton.heightAnchor),
 
-            searchButton.trailingAnchor.constraint(equalTo: themeButton.leadingAnchor, constant: -24),
+            searchButton.trailingAnchor.constraint(equalTo: themeButton.leadingAnchor, constant: -buttonSpacing),
             searchButton.centerYAnchor.constraint(equalTo: centerYAnchor),
             searchButton.heightAnchor.constraint(equalTo: themeButton.heightAnchor),
             searchButton.widthAnchor.constraint(equalTo: themeButton.widthAnchor),
+
+            favoritesButton.trailingAnchor.constraint(equalTo: searchButton.leadingAnchor, constant: -buttonSpacing),
+            favoritesButton.centerYAnchor.constraint(equalTo: centerYAnchor),
+            favoritesButton.heightAnchor.constraint(equalTo: themeButton.heightAnchor),
+            favoritesButton.widthAnchor.constraint(equalTo: themeButton.widthAnchor),
         ])
 
         // Actions
         searchButton.addTarget(self, action: #selector(didTapSearch), for: .touchUpInside)
+        favoritesButton.addTarget(self, action: #selector(didTapFavorites), for: .touchUpInside)
         themeButton.addTarget(self, action: #selector(didTapTheme), for: .touchUpInside)
 
         configure(averageRatingText: nil)
     }
 
     @objc private func didTapSearch() { onSearch?() }
+    @objc private func didTapFavorites() { onFavorites?() }
     @objc private func didTapTheme() { onTheme?() }
 
     override func prepareForReuse() {

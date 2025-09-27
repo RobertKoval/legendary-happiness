@@ -38,3 +38,10 @@ struct Movie: Hashable {
         self.isFavorite = isFavorite
     }
 }
+
+extension Movie {
+    func posterURL(from api: TMDBClient) -> URL? {
+        guard let path = posterPath else { return nil }
+        return api.imageUrlFromPath(path)
+    }
+}

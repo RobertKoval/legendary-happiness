@@ -28,16 +28,18 @@ extension TopRatedDTO {
         return Movies(page: page,
                       totalPages: limitedTotalPages,
                       movies: movies,
-                      averageRatingText: Self.makeAverageRatingText(for: movies),
+                      averageRatingText: movies.makeAverageRatingText(),
                       totalResults: totalResults)
     }
-    
-    private static func makeAverageRatingText(for movies: [Movie]) -> String? {
-        guard !movies.isEmpty else { return nil }
-        let totalRating = movies.reduce(0.0) { partial, movie in
+}
+
+extension Array where Element == Movie {
+    func makeAverageRatingText() -> String? {
+        guard !isEmpty else { return nil }
+        let totalRating = reduce(0.0) { partial, movie in
             partial + movie.rating
         }
-        let average = totalRating / Double(movies.count)
+        let average = totalRating / Double(count)
         return formatRating(average)
     }
 }
@@ -75,7 +77,17 @@ extension DetailsDTO {
             imageData: imageData
         )
     }
-    
+
+    func toMovie(isFavorite: Bool) -> Movie {
+        Movie(
+            id: id,
+            title: title,
+            rating: voteAverage,
+            posterPath: posterPath,
+            isFavorite: isFavorite
+        )
+    }
+
     private static func formatReleaseDate(_ dateString: String) -> String {
         let inputFormatter = DateFormatter()
         inputFormatter.dateFormat = "yyyy-MM-dd"

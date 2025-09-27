@@ -40,10 +40,7 @@ final class CatalogViewModel: ObservableObject {
     }
 
     func posterURL(for movie: Movie) -> URL? {
-        guard let path = movie.posterPath else {
-            return nil
-        }
-        return api.imageUrlFromPath(path)
+        return movie.posterURL(from: api)
     }
     
     var averageRatingText: String? {
@@ -151,5 +148,14 @@ final class CatalogViewModel: ObservableObject {
         let nextMovies = next?.toMovies(favorites: favorites)
         
         return (currentMovies, nextMovies)
+    }
+
+    func toggleFavorite(movieId: Int) {
+        if localStorage.isFavorite(movieId) {
+            localStorage.removeFavoriteMovieId(movieId)
+        } else {
+            localStorage.addFavoriteMovieId(movieId)
+        }
+        refreshFavorites()
     }
 }

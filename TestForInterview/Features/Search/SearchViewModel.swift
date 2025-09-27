@@ -70,11 +70,7 @@ final class SearchViewModel: ObservableObject {
     }
 
     func posterURL(for movie: Movie) -> URL? {
-        guard let path = movie.posterPath else {
-            return nil
-        }
-
-        return api.imageUrlFromPath(path)
+        return movie.posterURL(from: api)
     }
 
     func refreshFavorites() {
@@ -140,6 +136,15 @@ final class SearchViewModel: ObservableObject {
 
             state = .failed(error.toEquatableError())
         }
+    }
+
+    func toggleFavorite(movieId: Int) {
+        if localStorage.isFavorite(movieId) {
+            localStorage.removeFavoriteMovieId(movieId)
+        } else {
+            localStorage.addFavoriteMovieId(movieId)
+        }
+        refreshFavorites()
     }
 
     deinit {
